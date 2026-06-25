@@ -1,0 +1,7 @@
+msgid ""
+msgstr ""
+"Language: es\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Portada notebook"
+msgstr "# Esta es la portada de la notebook"
