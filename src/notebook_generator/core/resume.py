@@ -1,21 +1,21 @@
 import math
 import nbformat as nbf
 
-def describe_dataset(dataset, features, target, plots, type):
+def describe_dataset(dataset, features, target, plots, type, separator):
     cells = []
     columns = '[' + ', '.join(f"'{x}'" for x in features) + ']'
-    cells.extend(dataPreview(dataset, columns, target, type))
+    cells.extend(dataPreview(dataset, columns, target, type, separator))
     if plots > 0:
         cells.extend(data_plots(features, plots, target, type))
     return cells
 
 
-def dataPreview(dataset, columns, target, type):
+def dataPreview(dataset, columns, target, type, separator):
     cells = []
     cells.append(nbf.v4.new_code_cell("import pandas as pd\n"
                                       "filename = '" + dataset + "'\n"
                                                                  "names = " + columns + "\n"
-                                                                                        "data = pd.read_csv(filename, names = names)\n"
+                                                                                        "data = pd.read_csv(filename, sep=r'"+separator+"', names = names)\n"
                                                                                         "print(data)"))
     cells.append(nbf.v4.new_code_cell("data.head(15)"))
     cells.append(nbf.v4.new_code_cell("data.shape"))
@@ -45,7 +45,7 @@ def data_plots(features, plots, target, type):
                                                                                     "data.hist(ax = ax)\n"
                                                                                     "ptl.show()"))
 
-    num_features = len(features) if type == 'regression' else len(features) - 1
+    num_features = len(features)
     plot_cols = 4
     plot_rows = math.ceil(num_features / plot_cols)
 

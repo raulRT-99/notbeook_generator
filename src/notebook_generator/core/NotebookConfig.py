@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 class NotebookConfig:
     target_column:str = ""
     feature_columns: list[str] = field(default_factory=list)
+    separator = '\s+'
+    #'\s+'
     #number of plots to show in describing data (0-4)
     resume_plots:int = 3
     algorithms: list[str] = field(default_factory=list)

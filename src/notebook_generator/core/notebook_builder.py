@@ -6,6 +6,7 @@ from src.notebook_generator.generators.knn import generate_algorithm as KNN
 from src.notebook_generator.generators.random_forest import generate_algorithm as RF
 from src.notebook_generator.core.resume import describe_dataset
 from src.notebook_generator.core.preprocessing import preprocess_dataset
+from src.notebook_generator.generators.features.feature_selection import selection
 import os
 
 
@@ -15,10 +16,14 @@ def create_notebook(_, output_path, dataset, Notebook, multinotebook, title=None
         nb = create_title_page(_, nb, Notebook.algorithms)
         if multinotebook.get('describe'):
             describe_process(dataset, Notebook.feature_columns, Notebook.target_column, Notebook.resume_plots,
-                             Notebook.type, nb)
+                             Notebook.type, nb, Notebook.separator)
         if multinotebook.get('preprocessing'):
             preprocessing_process(nb, dataset, Notebook.feature_columns, Notebook.normalizer,
-                                  Notebook.normalize_negative_data)
+                                  Notebook.normalize_negative_data, Notebook.type, Notebook.target_column,
+                                  Notebook.separator)
+        if multinotebook.get("feature_selection"):
+            nb['cells'].extend(
+                selection(dataset, Notebook.feature_columns, Notebook.type, Notebook.target_column, Notebook.separator))
         # nb['cells'].extend(algorithms_process(_, Notebook.algorithms, dataset, Notebook.target_column))
 
         output_path = output_path + '/' + (title if title else datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + '.ipynb'
@@ -29,14 +34,14 @@ def create_notebook(_, output_path, dataset, Notebook, multinotebook, title=None
             nbf.write(nb, f)
 
 
-def describe_process(dataset, feature_columns, target_column, resume_plots, type, nb):
+def describe_process(dataset, feature_columns, target_column, resume_plots, type, nb, separator):
     nb['cells'].extend(
         describe_dataset(dataset, feature_columns, target_column, resume_plots,
-                         type))
+                         type, separator))
 
 
-def preprocessing_process(nb, dataset, features, normalizer, negative_data):
-    nb['cells'].extend(preprocess_dataset(dataset, features, normalizer, negative_data))
+def preprocessing_process(nb, dataset, features, normalizer, negative_data, type, target, separator):
+    nb['cells'].extend(preprocess_dataset(dataset, features, normalizer, negative_data, type, target, separator))
 
 
 def algorithms_process(_, algorithms, dataset, target_column):
