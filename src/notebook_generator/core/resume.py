@@ -1,7 +1,7 @@
 import math
 import nbformat as nbf
 
-def describe_dataset(dataset, features, target, plots, type, separator):
+def describe_dataset(_, dataset, features, target, plots, type, separator):
     cells = []
     columns = '[' + ', '.join(f"'{x}'" for x in features) + ']'
     cells.extend(dataPreview(dataset, columns, target, type, separator))

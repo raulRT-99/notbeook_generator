@@ -3,7 +3,7 @@ import math
 import pandas as pd
 
 
-def selection(dataset, features, type, target, separator):
+def selection(_,dataset, features, type, target, separator):
     cells = []
     columns = '[' + ', '.join(f"'{x}'" for x in features) + ']'
     num_features = len(features)
@@ -22,7 +22,7 @@ def selection(dataset, features, type, target, separator):
         cells.append(nbf.v4.new_code_cell("import pandas as pd\n"
                                           "filename = '" + dataset + "'\n"
                                                                      "names = " + columns + "\n"
-                                                                                            "dataframe = pd.read_csv(filename,sep='" + separator + "' names=names)\n"
+                                                                                            "dataframe = pd.read_csv(filename,sep='" + separator + "', names=names)\n"
                                                                                                                                                    "array = dataframe.values\n"
                                                                                                                                                    "X_df = array[:,0:" + str(
             num_features - 1) + "]\n"

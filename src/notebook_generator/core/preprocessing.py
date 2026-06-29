@@ -2,7 +2,7 @@ import nbformat as nbf
 from src.notebook_generator.core.resume import data_plots
 
 
-def preprocess_dataset(dataset, features, normalizer, negative_data, type, target, separator):
+def preprocess_dataset(_,dataset, features, normalizer, negative_data, type, target, separator):
     cells = []
     columns = '[' + ', '.join(f"'{x}'" for x in features) + ']'
     num_features = len(features)
@@ -12,7 +12,7 @@ def preprocess_dataset(dataset, features, normalizer, negative_data, type, targe
                                       "import seaborn as sns\n\n"
                                       "filename = '" + dataset + "'\n"
                                                                  "names = " + columns + "\n"
-                                                                                        "data = pd.read_csv(filename,sep='" + separator + "' names=names)\n"
+                                                                                        "data = pd.read_csv(filename,sep='" + separator + "', names=names)\n"
                                                                                                                                           "array = data.values\n"
                                                                                                                                           "x = array[:, 0:" + str(
         num_features - 1) + "]\n"
@@ -21,7 +21,7 @@ def preprocess_dataset(dataset, features, normalizer, negative_data, type, targe
     if negative_data:
         cells.extend(negative_data_normalize(negative_data))
 
-    cells.append(nbf.v4.new_code_cell("data=df_scaled"))
+    cells.append(nbf.v4.new_code_cell("data=df_scaled\n""df_data = data"))
     cells.extend(data_plots(features, 3, target, type))
 
     cells.append(nbf.v4.new_code_cell("#trad-texto para decir si quiere un nuevo csv con la data preprocesada\n"

@@ -1,30 +1,27 @@
 from pathlib import Path
 import nbformat as nbf
 from datetime import datetime
-from src.notebook_generator.generators.decision_tree import generate_algorithm as DT
-from src.notebook_generator.generators.knn import generate_algorithm as KNN
-from src.notebook_generator.generators.random_forest import generate_algorithm as RF
 from src.notebook_generator.core.resume import describe_dataset
 from src.notebook_generator.core.preprocessing import preprocess_dataset
-from src.notebook_generator.generators.features.feature_selection import selection
-import os
+from src.notebook_generator.generators.feature_selection import selection
 
 
-def create_notebook(_, output_path, dataset, Notebook, multinotebook, title=None):
+def create_notebook(_, output_path, dataset, Notebook, multinotebook, algorithms, title=None):
     if multinotebook.get('one_file'):
         nb = nbf.v4.new_notebook()
-        nb = create_title_page(_, nb, Notebook.algorithms)
+        nb = create_title_page(_, nb, algorithms)
         if multinotebook.get('describe'):
-            describe_process(dataset, Notebook.feature_columns, Notebook.target_column, Notebook.resume_plots,
+            describe_process(_, dataset, Notebook.feature_columns, Notebook.target_column, Notebook.resume_plots,
                              Notebook.type, nb, Notebook.separator)
         if multinotebook.get('preprocessing'):
-            preprocessing_process(nb, dataset, Notebook.feature_columns, Notebook.normalizer,
+            preprocessing_process(_, nb, dataset, Notebook.feature_columns, Notebook.normalizer,
                                   Notebook.normalize_negative_data, Notebook.type, Notebook.target_column,
                                   Notebook.separator)
         if multinotebook.get("feature_selection"):
             nb['cells'].extend(
-                selection(dataset, Notebook.feature_columns, Notebook.type, Notebook.target_column, Notebook.separator))
-        # nb['cells'].extend(algorithms_process(_, Notebook.algorithms, dataset, Notebook.target_column))
+                selection(_, dataset, Notebook.feature_columns, Notebook.type, Notebook.target_column, Notebook.separator))
+
+        nb['cells'].extend(algorithms_process(_, algorithms))
 
         output_path = output_path + '/' + (title if title else datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + '.ipynb'
         output_path = Path(output_path)
@@ -34,31 +31,31 @@ def create_notebook(_, output_path, dataset, Notebook, multinotebook, title=None
             nbf.write(nb, f)
 
 
-def describe_process(dataset, feature_columns, target_column, resume_plots, type, nb, separator):
+def describe_process(_,dataset, feature_columns, target_column, resume_plots, type, nb, separator):
+    nb['cells'].append(nbf.v4.new_markdown_cell('trad-proceso de resumend e datos'))
     nb['cells'].extend(
-        describe_dataset(dataset, feature_columns, target_column, resume_plots,
+        describe_dataset(_,dataset, feature_columns, target_column, resume_plots,
                          type, separator))
 
 
-def preprocessing_process(nb, dataset, features, normalizer, negative_data, type, target, separator):
-    nb['cells'].extend(preprocess_dataset(dataset, features, normalizer, negative_data, type, target, separator))
+def preprocessing_process(_,nb, dataset, features, normalizer, negative_data, type, target, separator):
+    nb['cells'].append(nbf.v4.new_markdown_cell('trad-proceso de preprocesamiento del dataset'))
+    nb['cells'].extend(preprocess_dataset(_,dataset, features, normalizer, negative_data, type, target, separator))
 
 
-def algorithms_process(_, algorithms, dataset, target_column):
+def algorithms_process(_, algorithms):
     cells = []
+    cells.append(nbf.v4.new_markdown_cell('trad---algorithms----'))
     for algorithm in algorithms:
-        match algorithm:
-            case "Decision_tree":
-                cells.extend(DT(_, dataset, target_column))
-            case "K-nn":
-                cells.extend(KNN(_, dataset, target_column))
-            case "Random_forest":
-                cells.extend(RF(_, dataset, target_column))
+        match algorithm.name:
+            case "knn":
+                algorithm.start_algorithm(_)
+                cells.extend(algorithm.cells)
     return cells
 
 
 def create_title_page(_, nb, algorithms):
     nb['cells'].append(nbf.v4.new_markdown_cell(_('trad-Portada notebook')))
-    nb['cells'].append(nbf.v4.new_markdown_cell('## trad-algoritmos a analizar\n- ' + '\n- '.join(algorithms)))
+    #nb['cells'].append(nbf.v4.new_markdown_cell('## trad-algoritmos a analizar\n- ' + '\n- '.join(algorithms.name)))
     nb['cells'].append(nbf.v4.new_markdown_cell('trad-notas a tener en cuenta'))
     return nb
