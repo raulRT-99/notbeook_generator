@@ -47,10 +47,9 @@ def algorithms_process(_, algorithms):
     cells = []
     cells.append(nbf.v4.new_markdown_cell('trad---algorithms----'))
     for algorithm in algorithms:
-        match algorithm.name:
-            case "knn":
-                algorithm.start_algorithm(_)
-                cells.extend(algorithm.cells)
+        cells.append(nbf.v4.new_markdown_cell("-----------"+algorithm.name+"-----------"))
+        algorithm.start_algorithm(_)
+        cells.extend(algorithm.cells)
     return cells
 
 

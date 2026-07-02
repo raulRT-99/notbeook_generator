@@ -64,6 +64,6 @@ class Knn(core_algorithm_process):
                                      "print('MAE:', mean_absolute_error(y_test, y_pred))"))
 
     def predict(self, _):
-        self.cells.append(nbf.v4.new_code_cell("new_values = [[5, 120, 80, 32, 0, 35.5, 0.4, 45]]"
-                                               "prediction = model.predict(new_values)"
+        self.cells.append(nbf.v4.new_code_cell("new_values = [[5, 120, 80, 32, 0, 35.5, 0.4, 45]]\n"
+                                               "prediction = model.predict(new_values)\n"
                                                "print('trad-Predicción: ', prediccion[0])"))

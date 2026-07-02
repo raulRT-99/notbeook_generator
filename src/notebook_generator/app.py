@@ -9,6 +9,7 @@ from core import notebook_builder
 from i18n.manager import load_language
 from src.notebook_generator.core.NotebookConfig import NotebookConfig
 from src.notebook_generator.generators.algorithms.Knn import Knn
+from src.notebook_generator.generators.algorithms.Decision_tree import Decission_tree
 
 output = 'C:/Users/raulr/OneDrive/Escritorio'
 target = 'final'
@@ -47,10 +48,11 @@ for tipo in tipos:
                               normalizer='Normalizer')
 
     knn = Knn(name='knn', notebook=Notebook, parameters={"neighbors": "5"}, dataset=data.get(tipo).get('dataset'))
+    dt = Decission_tree(name='Decission tree', notebook=Notebook, parameters={"test_size": "0.2", "random_state":"42"}, dataset=data.get(tipo).get('dataset'))
 
     multinotebook = {"one_file": True,
                      "describe": True,
                      "preprocessing": True,
                      "feature_selection": True}
 
-    notebook_builder.create_notebook(_, output, data.get(tipo).get('dataset'), Notebook, multinotebook, [knn], tipo, )
+    notebook_builder.create_notebook(_, output, data.get(tipo).get('dataset'), Notebook, multinotebook, [knn,dt], tipo+str(time.gmtime()) )
