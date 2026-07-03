@@ -15,3 +15,5 @@ class NotebookConfig:
     #features to be normalizer that have negative data, None = there is no negative data
     normalize_negative_data: list[str] = field(default_factory=list)
 
+
+

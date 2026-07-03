@@ -10,6 +10,9 @@ from i18n.manager import load_language
 from src.notebook_generator.core.NotebookConfig import NotebookConfig
 from src.notebook_generator.generators.algorithms.Knn import Knn
 from src.notebook_generator.generators.algorithms.Decision_tree import Decission_tree
+from src.notebook_generator.generators.algorithms.Gradient_boosting import Gradient_boosting
+from src.notebook_generator.generators.algorithms.Neuronal_network import Neural_network
+from src.notebook_generator.generators.algorithms.Random_forest import Random_forest
 
 output = 'C:/Users/raulr/OneDrive/Escritorio'
 target = 'final'
@@ -49,10 +52,13 @@ for tipo in tipos:
 
     knn = Knn(name='knn', notebook=Notebook, parameters={"neighbors": "5"}, dataset=data.get(tipo).get('dataset'))
     dt = Decission_tree(name='Decission tree', notebook=Notebook, parameters={"test_size": "0.2", "random_state":"42"}, dataset=data.get(tipo).get('dataset'))
+    gb = Gradient_boosting(name='Gradient boosting', notebook=Notebook, parameters={"test_size": "0.2", "random_state":"42"}, dataset=data.get(tipo).get('dataset'))
+    nn =  Neural_network(name='Neural network', notebook=Notebook, parameters={"test_size": "0.2", "random_state":"42", "max_iter":"200","layer_size":"64,32,16"}, dataset=data.get(tipo).get('dataset'))
+    rf = Random_forest(name='Random forest', notebook=Notebook,parameters={"test_size": "0.2", "random_state": "42", "estimators":"100"}, dataset=data.get(tipo).get('dataset'))
 
     multinotebook = {"one_file": True,
                      "describe": True,
                      "preprocessing": True,
                      "feature_selection": True}
 
-    notebook_builder.create_notebook(_, output, data.get(tipo).get('dataset'), Notebook, multinotebook, [knn,dt], tipo+str(time.gmtime()) )
+    notebook_builder.create_notebook(_, output, data.get(tipo).get('dataset'), Notebook, multinotebook, [knn,dt,gb,nn,rf], tipo+str(time.gmtime()) )
