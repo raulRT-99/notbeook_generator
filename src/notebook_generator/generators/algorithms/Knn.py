@@ -59,7 +59,7 @@ class Knn(core_algorithm_process):
             self.cells.append(
                 nbf.v4.new_code_cell("from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score\n\n"
                                      "y_pred = model.predict(X_test)\n"
-                                     "print('R2:', r2_score(y_test, y_pred)\n"
+                                     "print('R2:', r2_score(y_test, y_pred))\n"
                                      "print('MSE:', mean_squared_error(y_test, y_pred))\n"
                                      "print('MAE:', mean_absolute_error(y_test, y_pred))"))
 

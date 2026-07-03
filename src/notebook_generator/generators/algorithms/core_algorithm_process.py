@@ -9,12 +9,18 @@ class core_algorithm_process():
     parameters:dict[str, str] = field(default_factory=dict)
     cells:list = field(default_factory=list)
     dataset:str = ""
+    columns: str = ""
+
+    def getColumnsString(self):
+        self.columns = '[' + ', '.join(f"'{x}'" for x in self.notebook.feature_columns) + ']'
 
     def start_algorithm(self,_):
+        self.getColumnsString()
         self.import_dataset()
         self.train_test_model()
         self.results(_)
         self.predict(_)
+
 
     def import_dataset(self):
         #name, imports, load_csv,
