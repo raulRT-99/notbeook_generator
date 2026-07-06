@@ -34,7 +34,7 @@ class Knn(core_algorithm_process):
         text_code += ("target_column = '" + self.notebook.target_column + "'\n"
                                                                           "X = df.drop(columns=['" + self.notebook.target_column + "'])\n"
                                                                                                                                    "y = df['" + self.notebook.target_column + "']\n"
-                                                                                                                                                                              "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)\n\n")
+                                                                                                                                                                              "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y if y.value_counts().min() >= 2 else None)\n\n")
 
         if self.notebook.type == 'classification':
             text_code += (
@@ -45,25 +45,5 @@ class Knn(core_algorithm_process):
                     "model = Pipeline([('scaler', StandardScaler()),('knn', KNeighborsRegressor(n_neighbors=" + self.parameters.get(
                 'neighbors') + "))])\n\n")
 
-        text_code += "model.fit(X_train, y_train)"
 
         self.cells.append(nbf.v4.new_code_cell(text_code))
-
-    def results(self, _):
-        if self.notebook.type == 'classification':
-            self.cells.append(nbf.v4.new_code_cell("y_pred = model.predict(X_test)\n\n"
-                                                   "print('trad-Accuracy:', accuracy_score(y_test, y_pred))\n"
-                                                   "print(classification_report(y_test, y_pred))\n"
-                                                   "print(confusion_matrix(y_test, y_pred))\n"))
-        else:
-            self.cells.append(
-                nbf.v4.new_code_cell("from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score\n\n"
-                                     "y_pred = model.predict(X_test)\n"
-                                     "print('R2:', r2_score(y_test, y_pred))\n"
-                                     "print('MSE:', mean_squared_error(y_test, y_pred))\n"
-                                     "print('MAE:', mean_absolute_error(y_test, y_pred))"))
-
-    def predict(self, _):
-        self.cells.append(nbf.v4.new_code_cell("new_values = [[5, 120, 80, 32, 0, 35.5, 0.4, 45]]\n"
-                                               "prediction = model.predict(new_values)\n"
-                                               "print('trad-Predicción: ', prediccion[0])"))

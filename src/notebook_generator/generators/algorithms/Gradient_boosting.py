@@ -35,22 +35,3 @@ class Gradient_boosting(core_algorithm_process):
 
         self.cells.append(nbf.v4.new_code_cell(text_code))
 
-    def results(self, _):
-        text_code = ("model.fit(X_train, y_train)\n"
-                     "y_pred = model.predict(X_test)\n\n")
-
-        if self.notebook.type == 'classification':
-            text_code += ("print('tradAccuracy:', accuracy_score(y_test, y_pred))\n"
-                          "print(classification_report(y_test, y_pred))\n"
-                          "print(confusion_matrix(y_test, y_pred))\n")
-        else:
-            text_code += ("print('MAE:', mean_absolute_error(y_test, y_pred))\n"
-                          "print('MSE:', mean_squared_error(y_test, y_pred))\n"
-                          "print('R2:', r2_score(y_test, y_pred))\n")
-
-        self.cells.append(nbf.v4.new_code_cell(text_code))
-
-    def predict(self, _):
-        self.cells.append(nbf.v4.new_code_cell("nuevo_ejemplo = [[5, 120, 80, 32, 0, 35.5, 0.4, 45]]\n"
-                                               "prediccion = model.predict(nuevo_ejemplo)\n"
-                                               "print(prediccion[0])"))

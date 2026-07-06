@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from src.notebook_generator.core.NotebookConfig import NotebookConfig
+import nbformat as nbf
 
 
 @dataclass
@@ -32,8 +33,27 @@ class core_algorithm_process():
 
     def results(self, _):
         #evaluate
-        pass
+        text_code = ("model.fit(X_train, y_train)\n"
+                     "y_pred = model.predict(X_test)\n\n")
+
+        if self.notebook.type == 'classification':
+            text_code += ("evaluation_matrix['"+self.name+"'] = accuracy_score(y_test, y_pred)\n\n"
+                          "print('Accuracy:', accuracy_score(y_test, y_pred))\n"
+                          "print(classification_report(y_test, y_pred))\n"
+                          "print(confusion_matrix(y_test, y_pred))")
+        else:
+            text_code += ("MAE = mean_absolute_error(y_test, y_pred)\n"
+                          "MSE = mean_squared_error(y_test, y_pred)\n"
+                          "R2 = r2_score(y_test, y_pred)\n"
+                          "evaluation_matrix['"+self.name+"'] = {'MAE': MAE, 'MSE': MSE, 'R2': R2}\n\n"
+                          "print('MAE:', MAE)\n"
+                          "print('MSE:', MSE)\n"
+                          "print('R2:', R2)")
+
+        self.cells.append(nbf.v4.new_code_cell(text_code))
 
     def predict(self, _):
-        #preccit new
-        pass
+        #predict new
+        self.cells.append(nbf.v4.new_code_cell("nuevo_ejemplo = [[5, 120, 80, 32, 0, 35.5, 0.4, 45]]\n"
+                                               "prediccion = model.predict(nuevo_ejemplo)\n"
+                                               "print(prediccion[0])"))
