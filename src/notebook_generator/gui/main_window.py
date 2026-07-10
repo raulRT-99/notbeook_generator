@@ -1,5 +1,7 @@
-import pathlib
 from tkinter.filedialog import askdirectory, askopenfilename
+
+from pandas.core.util.numba_ import jit_user_function
+from ttkbootstrap.dialogs import Messagebox
 from ttkbootstrap.scrolled import ScrolledFrame
 
 import ttkbootstrap as ttk
@@ -9,15 +11,19 @@ from ttkbootstrap.constants import *
 class MainWindow:
     def __init__(self, _):
         self.font_size = 10
+        self.ingnore_wearnings = False
+        self.create_btn_style = 'secondary'
         # ---MAIN WINDOW---
         self.root = ttk.Window(themename="superhero")
         self.root.title("Mi aplicación")
-        self.root.geometry(str(self.font_size*155)+"x1000")
+        self.screen_width = self.font_size * 155
+        self.root.geometry(str(self.screen_width) + "x1000")
         style = ttk.Style()
         style.configure('.', font=('Segoe UI', self.font_size))
         # ---TOP BUTTOM BAR---
         self.buttonbar = ttk.Frame(self.root, style="primary.TFrame")
         self.buttonbar.pack(side=TOP, fill=X)
+
         # ---SCROLLED FRAME---
         self.sf = ScrolledFrame(self.root, autohide=True)
         self.sf.pack(fill=BOTH, expand=YES, padx=10, pady=10)
@@ -34,20 +40,20 @@ class MainWindow:
         self.output_name.grid(row=0, column=1, sticky="ew", padx=(20, 10))
         # ---SELECT FOLDER---
         self.output_folder = None
-        output_directory = pathlib.Path().absolute().as_posix()
+        output_directory = ''
         self.output_path_var = ttk.StringVar(value=output_directory)
         self.option_rg = ttk.Label(self.row, text="trad-select folder", padding=10)
         self.option_rg.grid(row=0, column=2, sticky="w")
         self.create_path_row('directory')
         # ---------------------------
-        self.separator = ttk.Separator(self.sf, bootstyle='warning')
-        self.separator.pack(fill='x')
+        self.separator1 = ttk.Separator(self.sf, bootstyle='light')
+        self.separator1.pack(fill='x')
         # ---------------------------
         # ---SELECT FILE---
         self.row2 = ttk.Frame(self.sf)
         self.row2.pack(fill=X, pady=30)
         self.init_file = None
-        file_directory = pathlib.Path().absolute().as_posix()
+        file_directory = ''
         self.file_path_var = ttk.StringVar(value=file_directory)
         self.option_lf = ttk.Label(self.row2, text="trad-select file", padding=10)
         self.option_lf.grid(row=0, column=0, sticky="w")
@@ -55,10 +61,10 @@ class MainWindow:
         # ---SEPARATOR IN FILE---
         label_sep = ttk.Label(self.row2, text="trad-separator", width=15)
         label_sep.grid(row=0, column=1, padx=(20, 10), sticky="w")
-        self.output_sep = ttk.Entry(self.row2, width=35)
-        self.output_sep.grid(row=0, column=2, sticky="ew", padx=(0, 10))
+        self.file_separator_str = ttk.Entry(self.row2, width=35)
+        self.file_separator_str.grid(row=0, column=2, sticky="ew", padx=(0, 10))
         # ---------------------------
-        self.separator2 = ttk.Separator(self.sf, bootstyle='warning')
+        self.separator2 = ttk.Separator(self.sf, bootstyle='light')
         self.separator2.pack(fill='x')
         # ---------------------------
         row3 = ttk.Frame(self.sf)
@@ -70,7 +76,8 @@ class MainWindow:
             "Clasificación": "classification",
             "Regresión": "regression"
         }
-        self.dftype_cb = ttk.Combobox(row3, values=list(self.dataframe_type_map.keys()), state="readonly", font=('Helvetica', self.font_size))
+        self.dftype_cb = ttk.Combobox(row3, values=list(self.dataframe_type_map.keys()), state="readonly",
+                                      font=('Helvetica', self.font_size))
         self.dftype_cb.grid(row=0, column=1, sticky="ew", padx=(20, 10))
         self.dftype_cb.current(0)
         # ---FEATURES---
@@ -84,8 +91,8 @@ class MainWindow:
         self.target_feature = ttk.Entry(row3, width=25, font=('Helvetica', self.font_size))
         self.target_feature.grid(row=1, column=1, sticky="ew", padx=(0, 10), pady=(30, 0))
         # ---------------------------
-        self.separator2 = ttk.Separator(self.sf, bootstyle='warning')
-        self.separator2.pack(fill='x')
+        self.separator3 = ttk.Separator(self.sf, bootstyle='light')
+        self.separator3.pack(fill='x')
         # ---------------------------
         # ***DESCRIBE OPTIONS***
         row4 = ttk.Frame(self.sf)
@@ -99,7 +106,7 @@ class MainWindow:
             command=lambda: self.toggle_enable_cb_options(self.describe_val, self.enable_describe_options_frame)
         )
         # --RESUME PLOTS--
-        self.enable_resume.grid(row=0, column=0, padx=5, pady=5)
+        self.enable_resume.grid(row=0, column=0, padx=5, pady=5, sticky='w')
         self.enable_describe_options_frame = ttk.Frame(row4)
         ttk.Label(self.enable_describe_options_frame, text="trad-Number of plots").grid(row=0, column=0, padx=5, pady=5)
         self.resume_plots_cb = ttk.Combobox(self.enable_describe_options_frame, values=[0, 1, 2, 3, 4],
@@ -115,49 +122,145 @@ class MainWindow:
             row5,
             text="trad-Enable preprocessing",
             variable=self.preprocessing_val,
-            command=lambda: self.toggle_enable_cb_options(self.preprocessing_val,
-                                                          self.enable_preprocessing_options_frame)
+            command=lambda: (self.toggle_enable_cb_options(self.preprocessing_val,
+                                                           self.enable_preprocessing_options_frame),
+                             self.describeNormalizingType())
         )
-        # --NORMALIZING TYPE
-        self.enable_preprocessing.grid(row=0, column=0, padx=5, pady=5)
+        # --NORMALIZING TYPE--
+        self.enable_preprocessing.grid(row=0, column=0, padx=5, pady=5, sticky='w')
         self.enable_preprocessing_options_frame = ttk.Frame(row5)
         ttk.Label(self.enable_preprocessing_options_frame, text="trad-Normalize type").grid(row=0, column=0, padx=5,
                                                                                             pady=5)
-        self.resume_plots_cb = ttk.Combobox(self.enable_preprocessing_options_frame,
-                                            values=['MinMaxScaler', 'StandardScaler', 'Normalizer'],
-                                            state="readonly", font=('Helvetica', self.font_size))
-        self.resume_plots_cb.grid(row=0, column=1, padx=5, pady=5)
-        self.resume_plots_cb.current(0)
-        #---ENABLE FEATURE SELECTION---
+        self.normalize_type_cb = ttk.Combobox(self.enable_preprocessing_options_frame,
+                                              values=['MinMaxScaler', 'StandardScaler', 'Normalizer'],
+                                              state="readonly", font=('Helvetica', self.font_size))
+        self.normalize_type_cb.grid(row=0, column=1, padx=5, pady=5)
+        self.normalize_type_cb.current(0)
+        self.describe_normalizing_type_lbl = ttk.Label(self.enable_preprocessing_options_frame,
+                                                       text='',
+                                                       wraplength=900,
+                                                       justify="left")
+        self.describe_normalizing_type_lbl.grid(row=0, column=2, padx=(40, 0))
+        self.normalize_type_cb.bind("<<ComboboxSelected>>", self.describeNormalizingType)
+        # ---ENABLE FEATURE SELECTION---
         row6 = ttk.Frame(self.sf)
         row6.pack(fill=X, pady=30)
-        self.enable_feature_selection = ttk.Checkbutton(row6,text="trad-Enable feature selection")
-        self.enable_feature_selection.grid(row=0, column=0,padx=5, pady=5)
-        #---ENABLE PREDICTIONS---
+        self.enable_feature_selection = ttk.Checkbutton(row6, text="trad-Enable feature selection")
+        self.enable_feature_selection.grid(row=0, column=0, padx=5, pady=5)
+        # ---ENABLE PREDICTIONS---
         self.enable_prediction = ttk.Checkbutton(row6, text="trad-Enable prediction")
-        self.enable_prediction.grid(row=0, column=1, padx=(50,0), pady=5)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        self.enable_prediction.grid(row=0, column=1, padx=(50, 0), pady=5)
+        # ---MULTINOTEBOOK---
+        self.enable_prediction = ttk.Checkbutton(row6, text="trad-multinotebook")
+        self.enable_prediction.grid(row=0, column=2, padx=(50, 0), pady=5)
+        # -----------------------
         self.container = ttk.Frame(self.sf, padding=0)
         self.container.pack(side=TOP, fill=BOTH, expand=YES)
-        title = ttk.Label(self.container, text="Página principal", font=("Segoe UI", 20, "bold"))
-        title.pack(pady=20)
+        # ---VALIDATE AND CREATE BUTTONS---
+        row7 = ttk.Frame(self.sf)
+        row7.pack(fill=X, pady=30)
+        row7.columnconfigure(0, weight=1)
+        row7.columnconfigure(1, weight=0)
+        row7.columnconfigure(2, weight=0)
+        row7.columnconfigure(3, weight=1)
+        self.validate_btn = ttk.Button(row7, text='trad-validar', bootstyle='primary', command=self.onValidate,
+                                       width=20)
+        self.validate_btn.grid(column=0, row=0, padx=(200, 10))
+        self.create_nb_btn = ttk.Button(row7, text='trad-crear notebook', bootstyle='secondary',
+                                        command=self.onCreateNotebook,
+                                        width=20, state='disable')
+        self.create_nb_btn.grid(column=1, row=0, padx=(10, 0))
+
+    def describeNormalizingType(self, event=None):
+        text = ''
+        match self.normalize_type_cb.get():
+            case 'MinMaxScaler':
+                text = 'trad-minmaxscaler text descaa aaaaaaaaaa aaaaaaaa aaaaa aa aaaaa aaa aaaaaaa aaa'
+            case 'StandardScaler':
+                text = 'trad-standarscaler text de scbbbbb bbbbbbb bbbb bbbb bbbbbbb bbbbbbbbbb bbb bbbbb bbbbbbbb bb bbbb bbbb'
+            case 'Normalizer':
+                text = 'trad-normalizer text descc cccc ccc ccccc cc ccc cc cccc cccccccc ccccc cc cc c c ccc c ccccccc cccc ccccccccccccccccc'
+        self.describe_normalizing_type_lbl.config(text=text)
+
+    def onCreateNotebook(self):
+        answer = None
+        match self.create_btn_style:
+            case 'warning':
+                answer = Messagebox.yesno(
+                    'trad-si no se describe nombre se elegira uno por defecto y si no se describe una ruta final se guardara el archivo en la ruta del archivo inicial',
+                    'trad-confirmar')
+            case 'danger':
+                answer = Messagebox.yesno(
+                    'trad-se debe especificar un archivo inicial y el tipo de separador para poder continuar',
+                    'trad-confirmar')
+
+        if answer == 'Yes' or self.create_btn_style == 'success':
+            pass
+
+    def onValidate(self):
+        warning_bool = not self.output_name.get() or self.output_name.get().strip() == '' or not self.output_folder.get() or self.output_folder.get().strip() == ''
+        danger1_bool = not self.init_file.get() or self.init_file.get().strip() == '' or not self.file_separator_str.get() or self.file_separator_str.get().strip() == ''
+        danger2_bool = not self.feature_names.get() or self.feature_names.get().strip() == '' or not self.target_feature.get() or self.target_feature.get().strip() == ''
+
+        if warning_bool:
+            self.change_separator(self.separator1, 'warning')
+        else:
+            self.change_separator(self.separator1, 'success')
+        if danger1_bool:
+            self.change_separator(self.separator2, 'danger')
+        else:
+            self.change_separator(self.separator2, 'success')
+        if danger2_bool:
+            self.change_separator(self.separator3, 'danger')
+        else:
+            self.change_separator(self.separator3, 'success')
+
+        if warning_bool and (not danger1_bool and not danger2_bool):
+            self.changeStyleCreateNotebookBtn('warning')
+            self.create_btn_style = 'warning'
+        elif danger1_bool or danger2_bool:
+            self.changeStyleCreateNotebookBtn('danger')
+            self.create_btn_style = 'danger'
+        elif not (warning_bool and danger1_bool and danger2_bool):
+            self.changeStyleCreateNotebookBtn('success')
+            self.create_btn_style = 'success'
+        else:
+            self.changeStyleCreateNotebookBtn('secondary')
+            self.create_btn_style = 'secondary'
+
+    def changeStyleCreateNotebookBtn(self, style):
+        self.create_nb_btn.configure(bootstyle=style)
+        if style == 'secondary':
+            self.create_nb_btn.configure(state='disabled')
+        else:
+            self.create_nb_btn.configure(state='enable')
 
     def topButtonBar(self):
-        btn = ttk.Button(self.buttonbar, text="Option 1", command=self.option1)
-        btn.pack(side=LEFT, padx=5, pady=5)
+        # btn = ttk.Button(self.buttonbar, text="Option 1", command=self.option1)
+        # btn.pack(side=LEFT, padx=5, pady=5)
+        rowX = ttk.Frame(self.buttonbar, bootstyle='dark')
+        rowX.pack(side=TOP, fill=X, expand=YES)
+
+
+        mb = ttk.Menubutton(rowX, text="Opciones", bootstyle='dark')
+        mb.grid(row=0, column=0, sticky='w')
+
+        menu = ttk.Menu(mb, tearoff=0)
+        menu.add_command(label="Opción 1", command=lambda: print("1"))
+        menu.add_command(label="Opción 2", command=lambda: print("2"))
+
+        mb["menu"] = menu
+
+        mb = ttk.Menubutton(rowX, text="Opciones", bootstyle='dark')
+        mb.grid(row=0, column=1, sticky='w')
+
+        menu = ttk.Menu(mb, tearoff=0)
+        menu.add_command(label="Opción 1", command=lambda: print("1"))
+        menu.add_command(label="Opción 2", command=lambda: print("2"))
+
+        mb["menu"] = menu
+
+
 
     def option1(self):
         print("clicked")
@@ -171,7 +274,8 @@ class MainWindow:
                                  text="trad-Ubicacion final",
                                  width=20)
             path_lbl.grid(row=0, column=0, padx=(0, 10), pady=5, sticky="w")
-            self.output_folder = ttk.Entry(output_path_row, textvariable=self.output_path_var, width=50, font=('Helvetica', self.font_size))
+            self.output_folder = ttk.Entry(output_path_row, textvariable=self.output_path_var, width=50,
+                                           font=('Helvetica', self.font_size))
             self.output_folder.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
             browse_btn = ttk.Button(
                 output_path_row,
@@ -189,7 +293,7 @@ class MainWindow:
                                  width=20)
             path_lbl.grid(row=0, column=0, padx=(0, 10), pady=5, sticky="w")
             self.init_file = ttk.Entry(file_path_row, textvariable=self.file_path_var, width=50,
-                                 font=('Helvetica', self.font_size))
+                                       font=('Helvetica', self.font_size))
             self.init_file.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
             browse_btn = ttk.Button(
                 file_path_row,
@@ -199,7 +303,6 @@ class MainWindow:
             )
             browse_btn.grid(row=0, column=2, padx=5, pady=5, sticky="w")
             file_path_row.columnconfigure(1, weight=1)
-
 
     def on_browse(self, type):
         if type == 'directory':
@@ -215,8 +318,8 @@ class MainWindow:
     def run(self):
         self.sf.mainloop()
 
-    def change_separator(self):
-        self.separator.configure(bootstyle="success")
+    def change_separator(self, separator, type):
+        separator.configure(bootstyle=type)
 
     def toggle_enable_cb_options(self, boolean_value_cb, options_frame):
         if boolean_value_cb.get():

@@ -2,3 +2,4 @@
 font_size: 20
 theme: superhero
 language: es
+ignore_warnings_create_nb: False
