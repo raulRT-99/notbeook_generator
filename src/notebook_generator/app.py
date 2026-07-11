@@ -95,5 +95,4 @@ main.run()
 #                      "prediction": True}
 #
 #
-#     notebook_builder.create_notebook(_, output, data.get(tipo).get('dataset'), Notebook, multinotebook,
-#                                      [knn, dt, gb, nn, rf, svm], tipo + str(time.gmtime()))
+

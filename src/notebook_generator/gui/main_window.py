@@ -1,6 +1,7 @@
 from tkinter.filedialog import askdirectory, askopenfilename
+from src.notebook_generator.gui.preCreate import onCreate
+from src.notebook_generator.generators.algorithms.base.algorithms_properties import ML_ALGORITHMS
 
-from pandas.core.util.numba_ import jit_user_function
 from ttkbootstrap.dialogs import Messagebox
 from ttkbootstrap.scrolled import ScrolledFrame
 
@@ -10,6 +11,8 @@ from ttkbootstrap.constants import *
 
 class MainWindow:
     def __init__(self, _):
+        self.predict_params = {}
+        self.predictionAlgorithms = {}
         self.font_size = 10
         self.ingnore_wearnings = False
         self.create_btn_style = 'secondary'
@@ -103,7 +106,7 @@ class MainWindow:
             row4,
             text="trad-Describe data",
             variable=self.describe_val,
-            command=lambda: self.toggle_enable_cb_options(self.describe_val, self.enable_describe_options_frame)
+            command=lambda: self.toggle_enable_cb_options(self.describe_val, self.enable_describe_options_frame, 1)
         )
         # --RESUME PLOTS--
         self.enable_resume.grid(row=0, column=0, padx=5, pady=5, sticky='w')
@@ -123,37 +126,73 @@ class MainWindow:
             text="trad-Enable preprocessing",
             variable=self.preprocessing_val,
             command=lambda: (self.toggle_enable_cb_options(self.preprocessing_val,
-                                                           self.enable_preprocessing_options_frame),
-                             self.describeNormalizingType())
+                                                           self.enable_preprocessing_options_frame, 1),
+                             self.describeNormalizingType(), self.toggle_enable_cb_options(
+                ttk.BooleanVar(self.enable_preprocessing_options_frame, value=False),
+                self.enable_negative_data_options_frame, 3), self.negative_data_val.set(False))
         )
         # --NORMALIZING TYPE--
         self.enable_preprocessing.grid(row=0, column=0, padx=5, pady=5, sticky='w')
         self.enable_preprocessing_options_frame = ttk.Frame(row5)
         ttk.Label(self.enable_preprocessing_options_frame, text="trad-Normalize type").grid(row=0, column=0, padx=5,
-                                                                                            pady=5)
+                                                                                            pady=5, sticky='w')
         self.normalize_type_cb = ttk.Combobox(self.enable_preprocessing_options_frame,
                                               values=['MinMaxScaler', 'StandardScaler', 'Normalizer'],
                                               state="readonly", font=('Helvetica', self.font_size))
-        self.normalize_type_cb.grid(row=0, column=1, padx=5, pady=5)
+        self.normalize_type_cb.grid(row=0, column=1, padx=5, pady=5, sticky='w')
         self.normalize_type_cb.current(0)
         self.describe_normalizing_type_lbl = ttk.Label(self.enable_preprocessing_options_frame,
                                                        text='',
                                                        wraplength=900,
                                                        justify="left")
-        self.describe_normalizing_type_lbl.grid(row=0, column=2, padx=(40, 0))
+        self.describe_normalizing_type_lbl.grid(row=0, column=2, padx=(50, 5))
         self.normalize_type_cb.bind("<<ComboboxSelected>>", self.describeNormalizingType)
+        # -NEGATIVE DATA-
+        self.negative_data_val = ttk.BooleanVar(self.enable_preprocessing_options_frame, value=False)
+        self.enable_negative_data = ttk.Checkbutton(
+            self.enable_preprocessing_options_frame,
+            text="trad-Enable negative data",
+            variable=self.negative_data_val,
+            command=lambda: self.toggle_enable_cb_options(self.negative_data_val,
+                                                          self.enable_negative_data_options_frame, 3)
+        )
+        self.enable_negative_data_options_frame = ttk.Frame(row5)
+        self.enable_negative_data.grid(row=2, column=0, padx=5, pady=5, sticky='w')
+        # NEGATIVE FEATURES
+        labelNegativeFeatures = ttk.Label(self.enable_negative_data_options_frame, text="trad-features:", width=12)
+        labelNegativeFeatures.grid(row=0, column=0, padx=5, sticky="w")
+        self.negative_feature_names = ttk.Entry(self.enable_negative_data_options_frame, width=60,
+                                                font=('Helvetica', self.font_size))
+        self.negative_feature_names.grid(row=0, column=1, sticky="w", padx=(20, 10))
+        # ---------------------------
+        self.separator4 = ttk.Separator(self.sf, bootstyle='light')
+        self.separator4.pack(fill='x')
+        # ---------------------------
         # ---ENABLE FEATURE SELECTION---
         row6 = ttk.Frame(self.sf)
         row6.pack(fill=X, pady=30)
         self.enable_feature_selection = ttk.Checkbutton(row6, text="trad-Enable feature selection")
         self.enable_feature_selection.grid(row=0, column=0, padx=5, pady=5)
-        # ---ENABLE PREDICTIONS---
-        self.enable_prediction = ttk.Checkbutton(row6, text="trad-Enable prediction")
-        self.enable_prediction.grid(row=0, column=1, padx=(50, 0), pady=5)
         # ---MULTINOTEBOOK---
         self.enable_prediction = ttk.Checkbutton(row6, text="trad-multinotebook")
         self.enable_prediction.grid(row=0, column=2, padx=(50, 0), pady=5)
         # -----------------------
+        row7 = ttk.Frame(self.sf)
+        row7.pack(fill=X, pady=30)
+        # ***ENABLE PREDICTIONS***
+        self.prediction_val = ttk.BooleanVar(row4, value=False)
+        self.enable_prediction = ttk.Checkbutton(
+            row7,
+            text="trad-Enable prediction",
+            variable=self.prediction_val,
+            command=lambda: self.toggle_enable_cb_options(self.prediction_val, self.enable_prediction_options, 1)
+        )
+        self.enable_prediction.grid(row=0, column=0, padx=(5, 0), pady=5)
+
+        # --PREDICTION SETTINGS--
+        self.enable_prediction_options = ttk.Frame(row7)
+        self.predictionSettings(self.enable_prediction_options)
+
         self.container = ttk.Frame(self.sf, padding=0)
         self.container.pack(side=TOP, fill=BOTH, expand=YES)
         # ---VALIDATE AND CREATE BUTTONS---
@@ -167,9 +206,113 @@ class MainWindow:
                                        width=20)
         self.validate_btn.grid(column=0, row=0, padx=(200, 10))
         self.create_nb_btn = ttk.Button(row7, text='trad-crear notebook', bootstyle='secondary',
-                                        command=self.onCreateNotebook,
+                                        command=lambda: self.onCreateNotebook(_),
                                         width=20, state='disable')
         self.create_nb_btn.grid(column=1, row=0, padx=(10, 0))
+
+    def predictionSettings(self, frame):
+        self.predict_params = {}
+        self.param_vars = {}
+
+        for alg in ML_ALGORITHMS:
+            alg_name = alg['name']
+            row = ttk.Frame(frame)
+            row.pack(fill=X, pady=30)
+
+            alg_val = ttk.BooleanVar(value=False)
+            enable_params_frame = ttk.Frame(row)
+            self.param_vars[alg_name] = {}
+
+            def toggle_alg(a=alg_name, v=alg_val, f=enable_params_frame):
+                self.toggle_enable_cb_options(v, f, 1)
+                if v.get():
+                    self.predict_params[a] = {}
+                    for pname, info in self.param_vars[a].items():
+                        self.predict_params[a][pname] = str(info["var"].get())
+                else:
+                    self.predict_params.pop(a, None)
+
+            enable_alg = ttk.Checkbutton(
+                row,
+                text=alg_name,
+                variable=alg_val,
+                command=toggle_alg
+            )
+            enable_alg.grid(row=0, column=0, padx=(5, 0), pady=5, sticky="w")
+
+            for x, param in enumerate(alg['parameters']):
+                param_name = param['back_name']
+                ttk.Label(enable_params_frame, text=param['show_name']).grid(
+                    row=0, column=x * 2, padx=10, pady=5, sticky='w'
+                )
+
+                match param['option_type']:
+                    case 'combobox':
+                        var = ttk.StringVar(value=param['options'][param['default']])
+                        combobox = ttk.Combobox(
+                            enable_params_frame,
+                            values=param['options'],
+                            textvariable=var,
+                            state="readonly",
+                            font=('Helvetica', self.font_size)
+                        )
+                        combobox.grid(row=0, column=x * 2 + 1, padx=10, pady=5)
+
+                        def on_combo(event=None, a=alg_name, p=param_name, v=var, enabled=alg_val):
+                            if enabled.get():
+                                self.predict_params.setdefault(a, {})
+                                self.predict_params[a][p] = str(v.get())
+
+                        combobox.bind("<<ComboboxSelected>>", on_combo)
+                        combobox.current(param['default'])
+
+                        self.param_vars[alg_name][param_name] = {"var": var, "widget": str(combobox)}
+
+                    case 'incremental':
+                        var = ttk.StringVar(value=str(param['default']))
+                        spinbox = ttk.Spinbox(
+                            enable_params_frame,
+                            from_=param['options'][0],
+                            to=param['options'][1],
+                            increment=param['options'][2],
+                            bootstyle="success",
+                            textvariable=var
+                        )
+                        spinbox.grid(row=0, column=x * 2 + 1, padx=10, pady=5)
+                        spinbox.set(param['default'])
+
+                        def on_spin(a=alg_name, p=param_name, v=var, enabled=alg_val):
+                            if enabled.get():
+                                self.predict_params.setdefault(a, {})
+                                self.predict_params[a][p] = str(v.get())
+
+                        spinbox.configure(command=on_spin)
+                        self.param_vars[alg_name][param_name] = {"var": var, "widget": str(spinbox)}
+
+                    case 'range':
+                        var = ttk.DoubleVar(value=float(param['default']))
+                        scale = ttk.Scale(
+                            enable_params_frame,
+                            from_=param['options'][0],
+                            to=param['options'][1],
+                            orient="horizontal",
+                            bootstyle="info",
+                            length=200
+                        )
+                        scale.grid(row=0, column=x * 2 + 1, padx=10, pady=5)
+                        scale.set(param['default'])
+
+                        def on_scale(value, a=alg_name, p=param_name, v=var, enabled=alg_val):
+                            v.set(float(value))
+                            if enabled.get():
+                                self.predict_params.setdefault(a, {})
+                                self.predict_params[a][p] = str(v.get())
+
+                        scale.configure(command=on_scale)
+                        self.param_vars[alg_name][param_name] = {"var": var, "widget": str(int(scale.get()))}
+
+            enable_params_frame.grid(row=1, column=0, columnspan=2, sticky="w", padx=5, pady=5)
+            enable_params_frame.grid_forget()
 
     def describeNormalizingType(self, event=None):
         text = ''
@@ -182,23 +325,29 @@ class MainWindow:
                 text = 'trad-normalizer text descc cccc ccc ccccc cc ccc cc cccc cccccccc ccccc cc cc c c ccc c ccccccc cccc ccccccccccccccccc'
         self.describe_normalizing_type_lbl.config(text=text)
 
-    def onCreateNotebook(self):
+    def onCreateNotebook(self, _):
         answer = None
+        self.onValidate()
         match self.create_btn_style:
             case 'warning':
                 answer = Messagebox.yesno(
-                    'trad-si no se describe nombre se elegira uno por defecto y si no se describe una ruta final se guardara el archivo en la ruta del archivo inicial',
+                    'trad-si no se describe nombre se elegira uno por defecto y si no se describe una ruta final se guardara el archivo en la ruta del archivo inicial\nsi no se escriben features negativos se ignorara',
                     'trad-confirmar')
             case 'danger':
                 answer = Messagebox.yesno(
-                    'trad-se debe especificar un archivo inicial y el tipo de separador para poder continuar',
+                    'trad-se debe especificar un archivo inicial y el tipo de separador para poder continuar\nasi como la columna target y las columnas de features',
                     'trad-confirmar')
 
-        if answer == 'Yes' or self.create_btn_style == 'success':
-            pass
+        if (answer == 'Yes' or answer == 'Sí') or self.create_btn_style == 'success':
+            response = onCreate(self, _)
+            # print(self.predict_params)
+            print(response)
+
 
     def onValidate(self):
         warning_bool = not self.output_name.get() or self.output_name.get().strip() == '' or not self.output_folder.get() or self.output_folder.get().strip() == ''
+        warning2_bool = self.negative_data_val.get() and (
+                not self.negative_feature_names.get() or self.negative_feature_names.get().strip() == '')
         danger1_bool = not self.init_file.get() or self.init_file.get().strip() == '' or not self.file_separator_str.get() or self.file_separator_str.get().strip() == ''
         danger2_bool = not self.feature_names.get() or self.feature_names.get().strip() == '' or not self.target_feature.get() or self.target_feature.get().strip() == ''
 
@@ -206,16 +355,23 @@ class MainWindow:
             self.change_separator(self.separator1, 'warning')
         else:
             self.change_separator(self.separator1, 'success')
+
+        if warning2_bool:
+            self.change_separator(self.separator4, 'warning')
+        else:
+            self.change_separator(self.separator4, 'success')
+
         if danger1_bool:
             self.change_separator(self.separator2, 'danger')
         else:
             self.change_separator(self.separator2, 'success')
+
         if danger2_bool:
             self.change_separator(self.separator3, 'danger')
         else:
             self.change_separator(self.separator3, 'success')
 
-        if warning_bool and (not danger1_bool and not danger2_bool):
+        if (warning2_bool or warning_bool) and (not danger1_bool and not danger2_bool):
             self.changeStyleCreateNotebookBtn('warning')
             self.create_btn_style = 'warning'
         elif danger1_bool or danger2_bool:
@@ -236,31 +392,24 @@ class MainWindow:
             self.create_nb_btn.configure(state='enable')
 
     def topButtonBar(self):
-        # btn = ttk.Button(self.buttonbar, text="Option 1", command=self.option1)
-        # btn.pack(side=LEFT, padx=5, pady=5)
         rowX = ttk.Frame(self.buttonbar, bootstyle='dark')
         rowX.pack(side=TOP, fill=X, expand=YES)
 
+        # ---MENU 1---
+        menu1 = ttk.Menubutton(rowX, text="Opciones", bootstyle='dark')
+        menu1.grid(row=0, column=0, sticky='w')
+        submenu1 = ttk.Menu(menu1, tearoff=0)
+        submenu1.add_command(label="Personalizacion", command=lambda: print("1"))
+        submenu1.add_command(label="Salir", command=lambda: print("2"))
+        menu1["menu"] = submenu1
 
-        mb = ttk.Menubutton(rowX, text="Opciones", bootstyle='dark')
-        mb.grid(row=0, column=0, sticky='w')
-
-        menu = ttk.Menu(mb, tearoff=0)
-        menu.add_command(label="Opción 1", command=lambda: print("1"))
-        menu.add_command(label="Opción 2", command=lambda: print("2"))
-
-        mb["menu"] = menu
-
-        mb = ttk.Menubutton(rowX, text="Opciones", bootstyle='dark')
-        mb.grid(row=0, column=1, sticky='w')
-
-        menu = ttk.Menu(mb, tearoff=0)
-        menu.add_command(label="Opción 1", command=lambda: print("1"))
-        menu.add_command(label="Opción 2", command=lambda: print("2"))
-
-        mb["menu"] = menu
-
-
+        # ---MENU 2---
+        menu2 = ttk.Menubutton(rowX, text="Ayuda", bootstyle='dark')
+        menu2.grid(row=0, column=1, sticky='w')
+        submenu2 = ttk.Menu(menu2, tearoff=0)
+        submenu2.add_command(label="? Ayuda", command=lambda: print("1"))
+        submenu2.add_command(label="About", command=lambda: print("2"))
+        menu2["menu"] = submenu2
 
     def option1(self):
         print("clicked")
@@ -321,9 +470,9 @@ class MainWindow:
     def change_separator(self, separator, type):
         separator.configure(bootstyle=type)
 
-    def toggle_enable_cb_options(self, boolean_value_cb, options_frame):
+    def toggle_enable_cb_options(self, boolean_value_cb, options_frame, row):
         if boolean_value_cb.get():
-            options_frame.grid(row=1, column=0, sticky="ew", pady=10)
+            options_frame.grid(row=row, column=0, sticky="ew", pady=10)
         else:
             options_frame.grid_forget()
 

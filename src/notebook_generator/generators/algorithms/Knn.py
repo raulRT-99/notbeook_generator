@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import nbformat as nbf
 
-from src.notebook_generator.generators.algorithms.core_algorithm_process import core_algorithm_process
+from src.notebook_generator.generators.algorithms.base.core_algorithm_process import core_algorithm_process
 
 
 @dataclass

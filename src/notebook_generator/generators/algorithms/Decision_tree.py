@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 import nbformat as nbf
 
-from src.notebook_generator.generators.algorithms.core_algorithm_process import core_algorithm_process
+from src.notebook_generator.generators.algorithms.base.core_algorithm_process import core_algorithm_process
 
 
 @dataclass
-class Decission_tree(core_algorithm_process):
+class Decision_tree(core_algorithm_process):
 
     def start_algorithm(self, _):
         super().start_algorithm(_)
