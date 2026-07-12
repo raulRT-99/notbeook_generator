@@ -18,8 +18,10 @@ def dataPreview(dataset, columns, target, type, separator):
                                                                                         "data = pd.read_csv(filename, sep=r'"+separator+"', names = names)\n"
                                                                                         "print(data)"))
     cells.append(nbf.v4.new_code_cell("data.head(15)"))
+    cells.append(nbf.v4.new_code_cell("data.isnull().sum()"))
     cells.append(nbf.v4.new_code_cell("data.shape"))
     cells.append(nbf.v4.new_code_cell("data.dtypes"))
+    cells.append(nbf.v4.new_code_cell("data.info()"))
     cells.append(nbf.v4.new_code_cell("pd.set_option('display.width', 100)\n"
                                       "pd.set_option('display.precision', 3)\n"
                                       "data.describe()\n"))
