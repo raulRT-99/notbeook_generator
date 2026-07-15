@@ -1,35 +1,59 @@
 from tkinter.filedialog import askdirectory, askopenfilename
 from src.notebook_generator.gui.preCreate import onCreate
 from src.notebook_generator.generators.algorithms.base.algorithms_properties import ML_ALGORITHMS
+from src.notebook_generator.gui.configuration import configurationWindow
+from gettext import gettext as _
 
 from ttkbootstrap.dialogs import Messagebox
-from ttkbootstrap.scrolled import ScrolledFrame
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 
 
 class MainWindow:
-    def __init__(self, _):
+    def __init__(self, translator):
+        self._ = translator
         self.predict_params = {}
         self.predictionAlgorithms = {}
-        self.font_size = 10
+        self.font_size = 12
         self.ingnore_wearnings = False
         self.create_btn_style = 'secondary'
         # ---MAIN WINDOW---
         self.root = ttk.Window(themename="superhero")
         self.root.title("Mi aplicación")
-        self.screen_width = self.font_size * 155
-        self.root.geometry(str(self.screen_width) + "x1000")
+        self.screen_width = min(self.font_size * 155, 1900)
+        self.screen_height =  min(self.font_size * 90, 1000)
+        self.root.geometry(str(self.screen_width) +"x"+ str(self.screen_height))
         style = ttk.Style()
         style.configure('.', font=('Segoe UI', self.font_size))
+
+        self.root.option_add('*TCombobox*Listbox.font', ('Segoe UI', self.font_size))
+        self.root.option_add('*TCombobox*Font', ('Segoe UI', self.font_size))
         # ---TOP BUTTOM BAR---
         self.buttonbar = ttk.Frame(self.root, style="primary.TFrame")
         self.buttonbar.pack(side=TOP, fill=X)
 
         # ---SCROLLED FRAME---
-        self.sf = ScrolledFrame(self.root, autohide=True)
-        self.sf.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        self.container = ttk.Frame(self.root)
+        self.container.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+
+        self.canvas = ttk.Canvas(self.container)
+        self.canvas.grid(row=0, column=0, sticky="nsew")
+
+        self.vbar = ttk.Scrollbar(self.container, orient=VERTICAL, command=self.canvas.yview)
+        self.vbar.grid(row=0, column=1, sticky="ns")
+
+        self.hbar = ttk.Scrollbar(self.container, orient=HORIZONTAL, command=self.canvas.xview)
+        self.hbar.grid(row=1, column=0, sticky="ew")
+
+        self.canvas.configure(yscrollcommand=self.vbar.set, xscrollcommand=self.hbar.set)
+
+        self.sf = ttk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), window=self.sf, anchor="nw")
+
+        self.sf.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
         # ADD TOP BUTTOM BAR
         self.topButtonBar()
 
@@ -171,11 +195,13 @@ class MainWindow:
         # ---ENABLE FEATURE SELECTION---
         row6 = ttk.Frame(self.sf)
         row6.pack(fill=X, pady=30)
-        self.enable_feature_selection = ttk.Checkbutton(row6, text="trad-Enable feature selection")
+        self.feature_selection_val = ttk.BooleanVar(row6, value=False)
+        self.enable_feature_selection = ttk.Checkbutton(row6,variable=self.feature_selection_val, text="trad-Enable feature selection")
         self.enable_feature_selection.grid(row=0, column=0, padx=5, pady=5)
         # ---MULTINOTEBOOK---
-        self.enable_prediction = ttk.Checkbutton(row6, text="trad-multinotebook")
-        self.enable_prediction.grid(row=0, column=2, padx=(50, 0), pady=5)
+        self.multinotebook_val = ttk.BooleanVar(row6, value=False)
+        self.enable_multinotebook = ttk.Checkbutton(row6,variable=self.multinotebook_val, text="trad-multinotebook")
+        self.enable_multinotebook.grid(row=0, column=2, padx=(50, 0), pady=5)
         # -----------------------
         row7 = ttk.Frame(self.sf)
         row7.pack(fill=X, pady=30)
@@ -340,9 +366,13 @@ class MainWindow:
 
         if (answer == 'Yes' or answer == 'Sí') or self.create_btn_style == 'success':
             response = onCreate(self, _)
-            # print(self.predict_params)
-            print(response)
+            self.showResponseMsg(response)
 
+    def showResponseMsg(self, response):
+        if True in response:
+            Messagebox.show_info(response[True],'trad-todo correcto')
+        else:
+            Messagebox.show_error(response[False], 'Error')
 
     def onValidate(self):
         warning_bool = not self.output_name.get() or self.output_name.get().strip() == '' or not self.output_folder.get() or self.output_folder.get().strip() == ''
@@ -392,6 +422,7 @@ class MainWindow:
             self.create_nb_btn.configure(state='enable')
 
     def topButtonBar(self):
+
         rowX = ttk.Frame(self.buttonbar, bootstyle='dark')
         rowX.pack(side=TOP, fill=X, expand=YES)
 
@@ -399,21 +430,17 @@ class MainWindow:
         menu1 = ttk.Menubutton(rowX, text="Opciones", bootstyle='dark')
         menu1.grid(row=0, column=0, sticky='w')
         submenu1 = ttk.Menu(menu1, tearoff=0)
-        submenu1.add_command(label="Personalizacion", command=lambda: print("1"))
-        submenu1.add_command(label="Salir", command=lambda: print("2"))
+        submenu1.add_command(label="Personalizacion", command=lambda: configurationWindow(translator=self._), font=('Segoe UI', self.font_size-1))
+        submenu1.add_command(label="Salir", command=lambda: print("2"), font=('Segoe UI', self.font_size-1))
         menu1["menu"] = submenu1
 
         # ---MENU 2---
         menu2 = ttk.Menubutton(rowX, text="Ayuda", bootstyle='dark')
         menu2.grid(row=0, column=1, sticky='w')
         submenu2 = ttk.Menu(menu2, tearoff=0)
-        submenu2.add_command(label="? Ayuda", command=lambda: print("1"))
-        submenu2.add_command(label="About", command=lambda: print("2"))
+        submenu2.add_command(label="? Ayuda", command=lambda: print("1"), font=('Segoe UI', self.font_size-1))
+        submenu2.add_command(label="About", command=lambda: print("2"), font=('Segoe UI', self.font_size-1))
         menu2["menu"] = submenu2
-
-    def option1(self):
-        print("clicked")
-        self.change_separator()
 
     def create_path_row(self, type):
         if type == 'directory':
@@ -456,13 +483,13 @@ class MainWindow:
     def on_browse(self, type):
         if type == 'directory':
             path = askdirectory(title="trad-Browse directory")
+            self.output_path_var.set(path)
         else:
             path = askopenfilename(
                 title="trad-Selecciona un archivo",
                 filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
             )
-        if path:
-            self.output_path_var.set(path)
+            self.file_path_var.set(path)
 
     def run(self):
         self.sf.mainloop()
@@ -478,5 +505,5 @@ class MainWindow:
 
 
 if __name__ == "__main__":
-    app = MainWindow()
+    app = MainWindow(translator=_)
     app.run()

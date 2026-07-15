@@ -10,7 +10,7 @@ from src.notebook_generator.gui.main_window import MainWindow
 from i18n.manager import load_language
 _ = load_language('es')
 
-main = MainWindow(_)
+main = MainWindow(translator=_)
 main.run()
 
 
