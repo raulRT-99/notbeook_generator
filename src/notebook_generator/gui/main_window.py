@@ -4,9 +4,7 @@ from src.notebook_generator.generators.algorithms.base.algorithms_properties imp
 from src.notebook_generator.gui.configuration import configurationWindow
 from gettext import gettext as _
 import webbrowser
-import os
 from ttkbootstrap.tooltip import ToolTip
-
 
 from ttkbootstrap.dialogs import Messagebox
 
@@ -15,7 +13,7 @@ from ttkbootstrap.constants import *
 
 
 class MainWindow:
-    def __init__(self,_, config):
+    def __init__(self,_, config=None):
         self.config = config
         self._ = _
         self.predict_params = {}
@@ -259,14 +257,9 @@ class MainWindow:
         ToolTip(self.enable_preprocessing, text="trad-habilitar preprocesamiento", delay=delay, wraplength=wraplenght)
         ToolTip(self.enable_negative_data, text="trad-habilitar preprocesamiento negativo de datos", delay=delay, wraplength=wraplenght)
         ToolTip(self.negative_feature_names, text="trad-colmnas negativas a preprocesar", delay=delay, wraplength=wraplenght)
-        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
-        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
-        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
-        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
-        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
-        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
-        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
-        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_feature_selection, text="trad-habiliatr feature selection", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_multinotebook, text="trad-habiliat multinotebook", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_prediction, text="trad-habiliat predicciones-ver documentacion", delay=delay, wraplength=wraplenght)
 
 
 
@@ -481,13 +474,11 @@ class MainWindow:
         menu2["menu"] = submenu2
 
     def openDocumentation(self):
-        url = "gui/help/index.html"
-        ruta_absoluta = os.path.abspath(url)
-        webbrowser.open('file://'+ruta_absoluta)
+        pass
 
     def showAbout(self):
         msg = Messagebox.okcancel('trad-proyecto open source para jupyter norebooks\ndesea ir al repositoprio de github?','about')
-        if msg == 'Ok':
+        if msg == 'OK':
             url = "https://github.com/raulRT-99/notbeook_generator"
             webbrowser.open(url)
 
@@ -555,5 +546,5 @@ class MainWindow:
 
 
 if __name__ == "__main__":
-    app = MainWindow(translator=_)
+    app = MainWindow(_=_)
     app.run()
