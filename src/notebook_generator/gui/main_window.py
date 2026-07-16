@@ -1,35 +1,63 @@
 from tkinter.filedialog import askdirectory, askopenfilename
 from src.notebook_generator.gui.preCreate import onCreate
 from src.notebook_generator.generators.algorithms.base.algorithms_properties import ML_ALGORITHMS
+from src.notebook_generator.gui.configuration import configurationWindow
+from gettext import gettext as _
+import webbrowser
+from ttkbootstrap.tooltip import ToolTip
 
 from ttkbootstrap.dialogs import Messagebox
-from ttkbootstrap.scrolled import ScrolledFrame
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 
 
 class MainWindow:
-    def __init__(self, _):
+    def __init__(self,_, config=None):
+        self.config = config
+        self._ = _
         self.predict_params = {}
         self.predictionAlgorithms = {}
-        self.font_size = 10
-        self.ingnore_wearnings = False
+        self.font_size = config['font_size']
+        self.ignore_warnings = config['ignore_warnings_create_nb']
         self.create_btn_style = 'secondary'
+        self.ignore_rescaling = config['ignore_rescaling_size']
         # ---MAIN WINDOW---
-        self.root = ttk.Window(themename="superhero")
+        self.root = ttk.Window(themename=self.config['theme'])
         self.root.title("Mi aplicación")
-        self.screen_width = self.font_size * 155
-        self.root.geometry(str(self.screen_width) + "x1000")
+        self.screen_width = min(self.font_size * 155, 1900 if not self.ignore_rescaling else 9999)
+        self.screen_height =  min(self.font_size * 90, 1000 if not self.ignore_rescaling else 9999)
+        self.root.geometry(str(self.screen_width) +"x"+ str(self.screen_height))
         style = ttk.Style()
         style.configure('.', font=('Segoe UI', self.font_size))
+
+        self.root.option_add('*TCombobox*Listbox.font', ('Segoe UI', self.font_size))
+        self.root.option_add('*TCombobox*Font', ('Segoe UI', self.font_size))
         # ---TOP BUTTOM BAR---
         self.buttonbar = ttk.Frame(self.root, style="primary.TFrame")
         self.buttonbar.pack(side=TOP, fill=X)
 
         # ---SCROLLED FRAME---
-        self.sf = ScrolledFrame(self.root, autohide=True)
-        self.sf.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        self.container = ttk.Frame(self.root)
+        self.container.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+
+        self.canvas = ttk.Canvas(self.container)
+        self.canvas.grid(row=0, column=0, sticky="nsew")
+
+        self.vbar = ttk.Scrollbar(self.container, orient=VERTICAL, command=self.canvas.yview)
+        self.vbar.grid(row=0, column=1, sticky="ns")
+
+        self.hbar = ttk.Scrollbar(self.container, orient=HORIZONTAL, command=self.canvas.xview)
+        self.hbar.grid(row=1, column=0, sticky="ew")
+
+        self.canvas.configure(yscrollcommand=self.vbar.set, xscrollcommand=self.hbar.set)
+
+        self.sf = ttk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), window=self.sf, anchor="nw")
+
+        self.sf.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
         # ADD TOP BUTTOM BAR
         self.topButtonBar()
 
@@ -171,11 +199,13 @@ class MainWindow:
         # ---ENABLE FEATURE SELECTION---
         row6 = ttk.Frame(self.sf)
         row6.pack(fill=X, pady=30)
-        self.enable_feature_selection = ttk.Checkbutton(row6, text="trad-Enable feature selection")
+        self.feature_selection_val = ttk.BooleanVar(row6, value=False)
+        self.enable_feature_selection = ttk.Checkbutton(row6,variable=self.feature_selection_val, text="trad-Enable feature selection")
         self.enable_feature_selection.grid(row=0, column=0, padx=5, pady=5)
         # ---MULTINOTEBOOK---
-        self.enable_prediction = ttk.Checkbutton(row6, text="trad-multinotebook")
-        self.enable_prediction.grid(row=0, column=2, padx=(50, 0), pady=5)
+        self.multinotebook_val = ttk.BooleanVar(row6, value=False)
+        self.enable_multinotebook = ttk.Checkbutton(row6,variable=self.multinotebook_val, text="trad-multinotebook")
+        self.enable_multinotebook.grid(row=0, column=2, padx=(50, 0), pady=5)
         # -----------------------
         row7 = ttk.Frame(self.sf)
         row7.pack(fill=X, pady=30)
@@ -209,6 +239,29 @@ class MainWindow:
                                         command=lambda: self.onCreateNotebook(_),
                                         width=20, state='disable')
         self.create_nb_btn.grid(column=1, row=0, padx=(10, 0))
+        #---TOOLTIPS---
+        if not self.config['ignore_tooltips']:
+            self.tooltips()
+
+    def tooltips(self):
+        delay = 700
+        wraplenght = 600
+        ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
+        ToolTip(self.output_folder, text="trad-nombre de la carpeta donde guardar", delay=delay, wraplength=wraplenght)
+        ToolTip(self.init_file, text="trad-nombre del archivo inicial", delay=delay, wraplength=wraplenght)
+        ToolTip(self.dftype_cb, text="trad-tipo de dataset", delay=delay, wraplenght=wraplenght)
+        ToolTip(self.file_separator_str, text="trad-separador del archivo", delay=delay, wraplength=wraplenght)
+        ToolTip(self.target_feature, text="trad-nombre de la columna objetivo", delay=delay, wraplength=wraplenght)
+        ToolTip(self.feature_names, text="trad-nombre de las columnas", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_resume, text="trad-habiliat resumen de dataset", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_preprocessing, text="trad-habilitar preprocesamiento", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_negative_data, text="trad-habilitar preprocesamiento negativo de datos", delay=delay, wraplength=wraplenght)
+        ToolTip(self.negative_feature_names, text="trad-colmnas negativas a preprocesar", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_feature_selection, text="trad-habiliatr feature selection", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_multinotebook, text="trad-habiliat multinotebook", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_prediction, text="trad-habiliat predicciones-ver documentacion", delay=delay, wraplength=wraplenght)
+
+
 
     def predictionSettings(self, frame):
         self.predict_params = {}
@@ -328,21 +381,29 @@ class MainWindow:
     def onCreateNotebook(self, _):
         answer = None
         self.onValidate()
-        match self.create_btn_style:
-            case 'warning':
-                answer = Messagebox.yesno(
-                    'trad-si no se describe nombre se elegira uno por defecto y si no se describe una ruta final se guardara el archivo en la ruta del archivo inicial\nsi no se escriben features negativos se ignorara',
-                    'trad-confirmar')
-            case 'danger':
-                answer = Messagebox.yesno(
-                    'trad-se debe especificar un archivo inicial y el tipo de separador para poder continuar\nasi como la columna target y las columnas de features',
-                    'trad-confirmar')
+        if not self.ignore_warnings:
+            match self.create_btn_style:
+                case 'warning':
+                    answer = Messagebox.yesno(
+                        'trad-si no se describe nombre se elegira uno por defecto y si no se describe una ruta final se guardara el archivo en la ruta del archivo inicial\nsi no se escriben features negativos se ignorara',
+                        'trad-confirmar')
+                case 'danger':
+                    answer = Messagebox.yesno(
+                        'trad-se debe especificar un archivo inicial y el tipo de separador para poder continuar\nasi como la columna target y las columnas de features',
+                        'trad-confirmar')
 
-        if (answer == 'Yes' or answer == 'Sí') or self.create_btn_style == 'success':
+            if (answer == 'Yes' or answer == 'Sí') or self.create_btn_style == 'success':
+                response = onCreate(self, _)
+                self.showResponseMsg(response)
+        else:
             response = onCreate(self, _)
-            # print(self.predict_params)
-            print(response)
+            self.showResponseMsg(response)
 
+    def showResponseMsg(self, response):
+        if True in response:
+            Messagebox.show_info(response[True],'trad-todo correcto')
+        else:
+            Messagebox.show_error(response[False], 'Error')
 
     def onValidate(self):
         warning_bool = not self.output_name.get() or self.output_name.get().strip() == '' or not self.output_folder.get() or self.output_folder.get().strip() == ''
@@ -399,21 +460,28 @@ class MainWindow:
         menu1 = ttk.Menubutton(rowX, text="Opciones", bootstyle='dark')
         menu1.grid(row=0, column=0, sticky='w')
         submenu1 = ttk.Menu(menu1, tearoff=0)
-        submenu1.add_command(label="Personalizacion", command=lambda: print("1"))
-        submenu1.add_command(label="Salir", command=lambda: print("2"))
+        submenu1.add_command(label="Personalizacion", command=lambda: configurationWindow(translator=self._, config=self.config), font=('Segoe UI', self.font_size-1))
+        submenu1.add_command(label="---------------", font=('Segoe UI', self.font_size - 1), state="disabled")
+        submenu1.add_command(label="Salir", command=lambda: self.root.quit(), font=('Segoe UI', self.font_size-1))
         menu1["menu"] = submenu1
 
         # ---MENU 2---
         menu2 = ttk.Menubutton(rowX, text="Ayuda", bootstyle='dark')
         menu2.grid(row=0, column=1, sticky='w')
         submenu2 = ttk.Menu(menu2, tearoff=0)
-        submenu2.add_command(label="? Ayuda", command=lambda: print("1"))
-        submenu2.add_command(label="About", command=lambda: print("2"))
+        submenu2.add_command(label="? Ayuda", command=self.openDocumentation, font=('Segoe UI', self.font_size-1))
+        submenu2.add_command(label="About", command=self.showAbout, font=('Segoe UI', self.font_size-1))
         menu2["menu"] = submenu2
 
-    def option1(self):
-        print("clicked")
-        self.change_separator()
+    def openDocumentation(self):
+        pass
+
+    def showAbout(self):
+        msg = Messagebox.okcancel('trad-proyecto open source para jupyter norebooks\ndesea ir al repositoprio de github?','about')
+        if msg == 'OK':
+            url = "https://github.com/raulRT-99/notbeook_generator"
+            webbrowser.open(url)
+
 
     def create_path_row(self, type):
         if type == 'directory':
@@ -456,13 +524,13 @@ class MainWindow:
     def on_browse(self, type):
         if type == 'directory':
             path = askdirectory(title="trad-Browse directory")
+            self.output_path_var.set(path)
         else:
             path = askopenfilename(
                 title="trad-Selecciona un archivo",
                 filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
             )
-        if path:
-            self.output_path_var.set(path)
+            self.file_path_var.set(path)
 
     def run(self):
         self.sf.mainloop()
@@ -478,5 +546,5 @@ class MainWindow:
 
 
 if __name__ == "__main__":
-    app = MainWindow()
+    app = MainWindow(_=_)
     app.run()

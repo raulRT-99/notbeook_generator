@@ -1,5 +1,6 @@
-
-font_size: 20
+font_size: 12
 theme: superhero
 language: es
-ignore_warnings_create_nb: False
+ignore_warnings_create_nb: false
+ignore_tooltips: false
+ignore_rescaling_size: false

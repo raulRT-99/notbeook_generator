@@ -13,10 +13,14 @@ def selection(_,dataset, features, type, target, separator):
                                       "import seaborn as sns\n"
                                       "import statsmodels.api as sm\n"
                                       "from sklearn.model_selection import train_test_split"))
-    if type == 'classification':
-        dataframe = pd.read_csv(dataset, names=features)
-        if dataframe[target].dtype != 'int64':
-            target_string = True
+
+    try:
+        if type == 'classification':
+            dataframe = pd.read_csv(dataset, names=features)
+            if dataframe[target].dtype != 'int64':
+                target_string = True
+    except KeyError:
+        raise KeyError('No target class detected by autoinject')
 
     if not target_string:
         cells.append(nbf.v4.new_code_cell("import pandas as pd\n"

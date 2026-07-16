@@ -1,38 +1,171 @@
 from tkinter.constants import X
+from gettext import gettext as _
+import yaml
+from ttkbootstrap.dialogs import Messagebox
 
 import ttkbootstrap as ttk
 
+
 class configurationWindow:
-    def __init__(self):
-        self.font_size = 10
-        self.ingnore_wearnings = False
+    def __init__(self, translator, config):
+        self.params = {}
+        self.config = config
+        self.font_size = self.config['font_size']
+        self._ = translator
         self.create_btn_style = 'secondary'
         # ---CONFIGURATION WINDOW---
-        self.root = ttk.Window(themename="superhero")
+        self.root = ttk.Toplevel()
         self.root.title("Personalizacion")
         self.screen_width = self.font_size * 155
-        self.root.geometry(str(self.screen_width//2) + "x800")
+        self.root.geometry(str(self.screen_width // 2) + "x800")
         style = ttk.Style()
         style.configure('.', font=('Segoe UI', self.font_size))
-        #---FONT SIZE---
         self.row1 = ttk.Frame(self.root)
-        self.row1.pack(fill=X, pady=30)
-        self.fontsize_lbl = ttk.Label(self.row1, text="Tamaño de fuente:", width=15)
-        self.fontsize_lbl.grid(row=0,column=0)
-        self.fontsizes = {
-            "Small": 10,
-            "Medium": 11,
-            "Large": 12
-        }
-        self.fontsize_cb = ttk.Combobox(self.row1, values=list(self.fontsizes.keys()), state="readonly",
-                                      font=('Helvetica', self.font_size))
-        self.fontsize_cb.grid(row=0, column=1, sticky="ew", padx=(20, 10))
-        self.fontsize_cb.current(0)
+        self.row1.pack(fill=X, pady=50, padx=50)
 
+        with open('Config/user_config.yml', 'r', encoding='utf-8') as f:
+            self.configFile = yaml.safe_load(f)
+
+        # ----AVALIABLE OPTIONS----
+        self.fontsizes = {
+            "10-Small": 10,
+            "11": 11,
+            "12-Medium": 12,
+            "13": 13,
+            "14-Large": 14
+        }
+        self.themes = {
+            "light-yeti": 'yeti',
+            "light-morph": 'morph',
+            "light-simplex": 'simplex',
+            "light-pulse": 'pulse',
+            "dark-solar": 'solar',
+            "dark-superhero": 'superhero',
+            "dark-cyborg": 'cyborg',
+            "dark-vapor": 'vapor'
+        }
+        self.languages = {
+            "Español": 'es',
+            "English": 'en'
+        }
+        self.allOptionsCombobox = {'font_size': self.fontsizes,
+                                   'theme': self.themes,
+                                   'language': self.languages}
+        self.config_options = {
+            'font_size': {
+                'label': 'trad-fontszie',
+                'menu': 'combobox',
+                'options': self.fontsizes,
+                'default': self.configFile['font_size']
+            },
+            'theme': {
+                'label': 'trad-theme',
+                'menu': 'combobox',
+                'options': self.themes,
+                'default': self.configFile['theme']
+            },
+            'language': {
+                'label': 'trad-language',
+                'menu': 'combobox',
+                'options': self.languages,
+                'default': self.configFile['language']
+            },
+            'ignore_warnings_create_nb': {
+                'label': 'trad-ignore warnings',
+                'menu': 'checkbox',
+                'default': self.configFile['ignore_warnings_create_nb']
+            },
+            'ignore_tooltips': {
+                'label': 'trad-ignore tooltips',
+                'menu': 'checkbox',
+                'default': self.configFile['ignore_tooltips']
+            },
+            'ignore_rescaling_size': {
+                'label': 'trad-ignore rescaling',
+                'menu': 'checkbox',
+                'default': self.configFile['ignore_rescaling_size']
+            }
+        }
+
+        # ---CREATE OPTIONS MENU---
+        for x, configOption in enumerate(self.configFile):
+            option = self.config_options[configOption]
+            label = ttk.Label(self.row1, text=option['label'], width=18)
+            label.grid(row=x, column=0)
+
+            if option['menu'] == 'combobox':
+                listOptions = self.allOptionsCombobox[configOption]
+                self.createCombobox(row=x, current=self.getPositionInMap(listOptions, option['default']),
+                                    map=option['options'], key=configOption)
+            elif option['menu'] == 'checkbox':
+                self.createCheckbox(current=option['default'], row=x, key=configOption)
+
+        # ---SAVE AND CANCEL BUTTONS---
+        row2 = ttk.Frame(self.root)
+        row2.pack(fill=X, pady=30)
+        row2.columnconfigure(0, weight=1)
+        row2.columnconfigure(1, weight=0)
+        row2.columnconfigure(2, weight=0)
+        row2.columnconfigure(3, weight=1)
+        self.cancel_btn = ttk.Button(row2, text='trad-save', bootstyle='danger', command=self.closeWindow,
+                                       width=20)
+        self.cancel_btn.grid(column=0, row=0, padx=(200, 10))
+        self.save_btn = ttk.Button(row2, text='trad-crear notebook', bootstyle='success',
+                                        command= self.onSave,
+                                        width=20)
+        self.save_btn.grid(column=1, row=0, padx=(10, 0))
+
+    def onSave(self):
+        for key, value in self.params.items():
+            self.configFile[key] = value
+            with open('Config/user_config.yml', "w", encoding="utf-8") as f:
+                yaml.safe_dump(self.configFile, f, allow_unicode=True, sort_keys=False)
+        Messagebox.show_info('trad-es necesario reinicar la aplicacion para aplicar los cambios','info')
+        self.closeWindow()
+
+    def closeWindow(self):
+        self.root.destroy()
+
+    def getPositionInMap(self, map, value):
+        valuesList = list(map.values())
+        return valuesList.index(value)
+
+    def createCombobox(self, map, row, current, key):
+        combo = ttk.Combobox(self.row1, values=list(map.keys()), state="readonly",
+                             font=('Helvetica', self.font_size))
+
+        def toggle(event, k=key):
+            v = event.widget.get()
+            self.params[k] = map[v]
+
+        combo.bind("<<ComboboxSelected>>", toggle)
+        combo.grid(row=row, column=1, sticky="ew", padx=(20, 10), pady=20)
+        combo.current(current)
+
+    def createCheckbox(self, current, row, key):
+        if not hasattr(self, "checkbox_vars"):
+            self.checkbox_vars = {}
+        var = ttk.BooleanVar(value=bool(current))
+        self.checkbox_vars[key] = var
+
+        def toggle(k=key, v=var):
+            self.params[k] = v.get()
+
+        checkbutton = ttk.Checkbutton(
+            self.row1,
+            text="",
+            variable=var,
+            onvalue=True,
+            offvalue=False,
+            bootstyle="square-toggle",
+            command=lambda : toggle(key, var)
+        )
+        checkbutton.grid(row=row, column=1, padx=5, pady=5, sticky='ew')
 
     def run(self):
         self.root.mainloop()
 
+
 if __name__ == "__main__":
-    app = configurationWindow()
+    app = configurationWindow(translator=_)
     app.run()
