@@ -3,6 +3,10 @@ from src.notebook_generator.gui.preCreate import onCreate
 from src.notebook_generator.generators.algorithms.base.algorithms_properties import ML_ALGORITHMS
 from src.notebook_generator.gui.configuration import configurationWindow
 from gettext import gettext as _
+import webbrowser
+import os
+from ttkbootstrap.tooltip import ToolTip
+
 
 from ttkbootstrap.dialogs import Messagebox
 
@@ -11,18 +15,20 @@ from ttkbootstrap.constants import *
 
 
 class MainWindow:
-    def __init__(self, translator):
-        self._ = translator
+    def __init__(self,_, config):
+        self.config = config
+        self._ = _
         self.predict_params = {}
         self.predictionAlgorithms = {}
-        self.font_size = 12
-        self.ingnore_wearnings = False
+        self.font_size = config['font_size']
+        self.ignore_warnings = config['ignore_warnings_create_nb']
         self.create_btn_style = 'secondary'
+        self.ignore_rescaling = config['ignore_rescaling_size']
         # ---MAIN WINDOW---
-        self.root = ttk.Window(themename="superhero")
+        self.root = ttk.Window(themename=self.config['theme'])
         self.root.title("Mi aplicación")
-        self.screen_width = min(self.font_size * 155, 1900)
-        self.screen_height =  min(self.font_size * 90, 1000)
+        self.screen_width = min(self.font_size * 155, 1900 if not self.ignore_rescaling else 9999)
+        self.screen_height =  min(self.font_size * 90, 1000 if not self.ignore_rescaling else 9999)
         self.root.geometry(str(self.screen_width) +"x"+ str(self.screen_height))
         style = ttk.Style()
         style.configure('.', font=('Segoe UI', self.font_size))
@@ -235,6 +241,34 @@ class MainWindow:
                                         command=lambda: self.onCreateNotebook(_),
                                         width=20, state='disable')
         self.create_nb_btn.grid(column=1, row=0, padx=(10, 0))
+        #---TOOLTIPS---
+        if not self.config['ignore_tooltips']:
+            self.tooltips()
+
+    def tooltips(self):
+        delay = 700
+        wraplenght = 600
+        ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
+        ToolTip(self.output_folder, text="trad-nombre de la carpeta donde guardar", delay=delay, wraplength=wraplenght)
+        ToolTip(self.init_file, text="trad-nombre del archivo inicial", delay=delay, wraplength=wraplenght)
+        ToolTip(self.dftype_cb, text="trad-tipo de dataset", delay=delay, wraplenght=wraplenght)
+        ToolTip(self.file_separator_str, text="trad-separador del archivo", delay=delay, wraplength=wraplenght)
+        ToolTip(self.target_feature, text="trad-nombre de la columna objetivo", delay=delay, wraplength=wraplenght)
+        ToolTip(self.feature_names, text="trad-nombre de las columnas", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_resume, text="trad-habiliat resumen de dataset", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_preprocessing, text="trad-habilitar preprocesamiento", delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_negative_data, text="trad-habilitar preprocesamiento negativo de datos", delay=delay, wraplength=wraplenght)
+        ToolTip(self.negative_feature_names, text="trad-colmnas negativas a preprocesar", delay=delay, wraplength=wraplenght)
+        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
+        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
+        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
+        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
+        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
+        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
+        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
+        # ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
+
+
 
     def predictionSettings(self, frame):
         self.predict_params = {}
@@ -354,17 +388,21 @@ class MainWindow:
     def onCreateNotebook(self, _):
         answer = None
         self.onValidate()
-        match self.create_btn_style:
-            case 'warning':
-                answer = Messagebox.yesno(
-                    'trad-si no se describe nombre se elegira uno por defecto y si no se describe una ruta final se guardara el archivo en la ruta del archivo inicial\nsi no se escriben features negativos se ignorara',
-                    'trad-confirmar')
-            case 'danger':
-                answer = Messagebox.yesno(
-                    'trad-se debe especificar un archivo inicial y el tipo de separador para poder continuar\nasi como la columna target y las columnas de features',
-                    'trad-confirmar')
+        if not self.ignore_warnings:
+            match self.create_btn_style:
+                case 'warning':
+                    answer = Messagebox.yesno(
+                        'trad-si no se describe nombre se elegira uno por defecto y si no se describe una ruta final se guardara el archivo en la ruta del archivo inicial\nsi no se escriben features negativos se ignorara',
+                        'trad-confirmar')
+                case 'danger':
+                    answer = Messagebox.yesno(
+                        'trad-se debe especificar un archivo inicial y el tipo de separador para poder continuar\nasi como la columna target y las columnas de features',
+                        'trad-confirmar')
 
-        if (answer == 'Yes' or answer == 'Sí') or self.create_btn_style == 'success':
+            if (answer == 'Yes' or answer == 'Sí') or self.create_btn_style == 'success':
+                response = onCreate(self, _)
+                self.showResponseMsg(response)
+        else:
             response = onCreate(self, _)
             self.showResponseMsg(response)
 
@@ -422,7 +460,6 @@ class MainWindow:
             self.create_nb_btn.configure(state='enable')
 
     def topButtonBar(self):
-
         rowX = ttk.Frame(self.buttonbar, bootstyle='dark')
         rowX.pack(side=TOP, fill=X, expand=YES)
 
@@ -430,17 +467,30 @@ class MainWindow:
         menu1 = ttk.Menubutton(rowX, text="Opciones", bootstyle='dark')
         menu1.grid(row=0, column=0, sticky='w')
         submenu1 = ttk.Menu(menu1, tearoff=0)
-        submenu1.add_command(label="Personalizacion", command=lambda: configurationWindow(translator=self._), font=('Segoe UI', self.font_size-1))
-        submenu1.add_command(label="Salir", command=lambda: print("2"), font=('Segoe UI', self.font_size-1))
+        submenu1.add_command(label="Personalizacion", command=lambda: configurationWindow(translator=self._, config=self.config), font=('Segoe UI', self.font_size-1))
+        submenu1.add_command(label="---------------", font=('Segoe UI', self.font_size - 1), state="disabled")
+        submenu1.add_command(label="Salir", command=lambda: self.root.quit(), font=('Segoe UI', self.font_size-1))
         menu1["menu"] = submenu1
 
         # ---MENU 2---
         menu2 = ttk.Menubutton(rowX, text="Ayuda", bootstyle='dark')
         menu2.grid(row=0, column=1, sticky='w')
         submenu2 = ttk.Menu(menu2, tearoff=0)
-        submenu2.add_command(label="? Ayuda", command=lambda: print("1"), font=('Segoe UI', self.font_size-1))
-        submenu2.add_command(label="About", command=lambda: print("2"), font=('Segoe UI', self.font_size-1))
+        submenu2.add_command(label="? Ayuda", command=self.openDocumentation, font=('Segoe UI', self.font_size-1))
+        submenu2.add_command(label="About", command=self.showAbout, font=('Segoe UI', self.font_size-1))
         menu2["menu"] = submenu2
+
+    def openDocumentation(self):
+        url = "gui/help/index.html"
+        ruta_absoluta = os.path.abspath(url)
+        webbrowser.open('file://'+ruta_absoluta)
+
+    def showAbout(self):
+        msg = Messagebox.okcancel('trad-proyecto open source para jupyter norebooks\ndesea ir al repositoprio de github?','about')
+        if msg == 'Ok':
+            url = "https://github.com/raulRT-99/notbeook_generator"
+            webbrowser.open(url)
+
 
     def create_path_row(self, type):
         if type == 'directory':
