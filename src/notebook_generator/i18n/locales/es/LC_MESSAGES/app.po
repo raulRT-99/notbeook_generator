@@ -169,6 +169,9 @@ msgstr "Separador de columnas del dataset.\nEjemplos: coma (,), tabulador (\\t),
 msgid "feature_names_tooltip"
 msgstr "Columnas del dataset, separadas por coma (,)"
 
+msgid "target_column_tooltip"
+msgstr "Columna del dataset a procesar y predecir"
+
 msgid "enable_resume_tooltip"
 msgstr "Agrega al notebook descripción de los datos del dataset"
 
@@ -234,7 +237,7 @@ msgstr "Acerca de"
 
 msgid "showAbout_txt"
 msgstr ""
-"About\n"
+"Acerca de\n"
 "\n"
 "Desarrollado por raulRT99.\n"
 "Notebook Generator te permite crear y configurar notebooks de manera sencilla y personalizada.\n"
@@ -253,3 +256,23 @@ msgstr "Buscar archivo inicial (dataset)"
 
 msgid "FOLDER-NOT-FOUND-ERROR"
 msgstr "La ruta de destino no existe o no se pudo resolver."
+
+msgid "barmenu_version_submenu"
+msgstr "Comprobar actualizaciones"
+
+msgid "AVAILABLE-VERSION-TXT"
+msgstr ""
+"Hay una versión nueva disponible. (%(version)s)\n"
+"¿Acceder al repositorio?"
+
+msgid "AVAILABLE-VERSION-TITLE-TXT"
+msgstr "Actualización disponible"
+
+msgid "UPDATED-VERSION-TXT"
+msgstr "Ya tienes la última versión."
+
+msgid "UPDATED-VERSION-TITLE-TXT"
+msgstr "Actualizado!"
+
+msgid "UPDATE-VERSION-ERROR"
+msgstr "No se pudo comprobar la versión: %(error)s"
