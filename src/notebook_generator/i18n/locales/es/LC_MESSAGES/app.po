@@ -1,7 +1,278 @@
 msgid ""
 msgstr ""
+
 "Language: es\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-msgid "Portada notebook"
-msgstr "# Esta es la portada de la notebook"
+msgid "language"
+msgstr "es"
+
+msgid "TYPE-ERROR-MSG"
+msgstr "La ruta o el título no tienen un tipo válido."
+
+msgid "PERMISSION-ERROR-MSG"
+msgstr "No tienes permisos para escribir en esa carpeta."
+
+msgid "FILE-NOT-FOUND-ERROR-MSG"
+msgstr "La ruta de destino no existe o no se pudo resolver."
+
+msgid "OSERROR-MSG"
+msgstr "Error del sistema al crear o escribir el archivo"
+
+msgid "UNEXPECTED-ERROR-MSG"
+msgstr "Error inesperado: %(error)s"
+
+msgid "NOTEBOOK-GENERATED-MSG"
+msgstr "Archivo generado con éxito!"
+
+msgid "ALGORITHM-PROCESS-TITLE"
+msgstr "-----ALGORITMOS-----"
+
+msgid "TITLE-PAGE"
+msgstr ""
+"# Notebook Generator\n"
+"---\n"
+"\n"
+"## Descripción\n"
+"Este notebook fue generado con **Notebook Generator**, una herramienta de escritorio desarrollada en Python que permite crear y personalizar notebooks de forma rápida y consistente a partir de una configuración predefinida.\n"
+"\n"
+"El objetivo es facilitar la creación de cuadernos con:\n"
+"- Estructura estándar (secciones, títulos, plantillas).\n"
+"- Configuración personalizable (tema, idioma, tamaño de fuente).\n"
+"- Integración con flujos de trabajo de análisis de datos o documentación técnica.\n"
+"\n"
+"---"
+
+msgid "IMPORTANT-INFO-BREFORE-RUNING"
+msgstr "> Es importante tener en cuenta que este notebook generado automáticamente no busca reemplazar a un analista de datos, ya que la información procesada aún debe ser analizada y estudiada por un especialista. Se recomienda revisar tanto el código como los resultados antes de utilizarlos para la toma de decisiones."
+
+msgid "DESCRIBE-PROCESS-TXT"
+msgstr "# Fase de resumen y descripción de datos"
+
+msgid "PREPROCESSING-PROCESS-TXT"
+msgstr "# Fase de preprocesamiento y normalización"
+
+msgid "ML-ALGORITHMS-PROCESS-TXT"
+msgstr "# Fase de entrenamiento y predicción"
+
+msgid "NEW-PREPROCESSED-DATASET"
+msgstr "#Si deseas generar un nuevo dataset con la información preprocesada, ejecuta esta línea"
+
+msgid "YEO-JHONNSON-MSG"
+msgstr "#Los valores negativos deben procesarse con Yeo Jhonnson"
+
+msgid "REPLACE-WITH-NEW-DATASET"
+msgstr "#Reemplaza con un nuevo dataset"
+
+msgid "ALGORITHMS-COMPARISON"
+msgstr "Comparación entre algoritmos"
+
+msgid "PERSONALIZATION-GUI-TITLE"
+msgstr "Personalización"
+
+msgid "CANCEL-BTN"
+msgstr "Cancelar"
+
+msgid "SAVE-BTN"
+msgstr "Guardar"
+
+msgid "RESTART-APP-MSG"
+msgstr "Es necesario reiniciar la aplicación para poder aplicar los cambios"
+
+msgid "fontszie-lbl"
+msgstr "Tamaño de fuente"
+
+msgid "theme-lbl"
+msgstr "Tema"
+
+msgid "language-lbl"
+msgstr "Idioma"
+
+msgid "ignore-warnings-lbl"
+msgstr "Ignorar alertas al crear"
+
+msgid "ignore-tooltips-lbl"
+msgstr "Ignorar mensajes de ayuda"
+
+msgid "ignore-rescaling-lbl"
+msgstr "Ignorar rescalado por tamaño de fuente"
+
+msgid "labelOutput"
+msgstr "Nombre del archivo final"
+
+msgid "select_folder_lbl"
+msgstr "Carpeta destino"
+
+msgid "select_file_lbl"
+msgstr "Archivo a analizar (Dataset)"
+
+msgid "separator_lbl"
+msgstr "Separador de columnas"
+
+msgid "dataset_type_lbl"
+msgstr "Tipo de análisis"
+
+msgid "labelFeatures"
+msgstr "Columnas del dataset"
+
+msgid "labelTarget"
+msgstr "Columna objetivo"
+
+msgid "enable_resume_txt"
+msgstr "Habilitar descripción de dataset"
+
+msgid "plots_number_lbl"
+msgstr "Número de gráficas a mostrar"
+
+msgid "enable_preprocessing_txt"
+msgstr "Habilitar preprocesamiento de datos"
+
+msgid "normalize_type_lbl"
+msgstr "Tipo de normalización"
+
+msgid "negative_data_txt"
+msgstr "¿Datos con valores negativos?"
+
+msgid "labelNegativeFeatures"
+msgstr "Columnas con datos negativos"
+
+msgid "feature_selection_txt"
+msgstr "Habilitar selección automática de características"
+
+msgid "multinotebook_txt"
+msgstr "¿Múltiples notebooks?"
+
+msgid "predictions_txt"
+msgstr "Habilitar predicciones"
+
+msgid "VALIDATE-BTN"
+msgstr "Validar campos"
+
+msgid "CREATE-NOTEBOOK-BTN"
+msgstr "Crear notebook"
+
+msgid "output_name_tooltip"
+msgstr "Nombre que recibirá el notebook de Jupyter generado"
+
+msgid "output_folder_tooltip"
+msgstr "Destino del juoyter notebook"
+
+msgid "init_file_tooltip"
+msgstr "Archivo csv del dataset"
+
+msgid "dftype_cb_tooltip"
+msgstr "Tipo de tarea del aprendizaje supervisado"
+
+msgid "file_separator_str_tooltip"
+msgstr "Separador de columnas del dataset.\nEjemplos: coma (,), tabulador (\\t), punto y coma (;), \\r, \\r\\n, etc."
+
+msgid "feature_names_tooltip"
+msgstr "Columnas del dataset, separadas por coma (,)"
+
+msgid "target_column_tooltip"
+msgstr "Columna del dataset a procesar y predecir"
+
+msgid "enable_resume_tooltip"
+msgstr "Agrega al notebook descripción de los datos del dataset"
+
+msgid "enable_preprocessing_tooltip"
+msgstr "Agrega al notebook algoritmos de preprocesamiento de datos"
+
+msgid "enable_negative_data_tooltip"
+msgstr "Si tu dataset tiene valores en rangos negativos, selecciona esta opción"
+
+msgid "negative_feature_names_tooltip"
+msgstr "Columnas con valores en rangos negativos, separadas por coma (,)"
+
+msgid "enable_feature_selection_tooltip"
+msgstr "Agrega al notebook algoritmos de selección de mejores características (columnas) automáticas"
+
+msgid "enable_multinotebook_tooltip"
+msgstr "Si seleccionas esta opcion cada fase del aprendizaje sera separada en su propio jupyter notebook, de lo contrario todo se generara dentro del mismo archivo"
+
+msgid "enable_prediction_tooltip"
+msgstr "Agregar algoritmos de machine learning para la predicción de datos"
+
+msgid "MinMaxScaler_description"
+msgstr "Escala y transforma cada característica individualmente a un rango específico (por defecto, entre 0 y 1). Es ideal para algoritmos sensibles a las distancias, como redes neuronales o K-Vecinos más Cercanos (KNN)"
+
+msgid "StandardScaler_description"
+msgstr "Herramienta que estandariza las características numéricas eliminando la media y escalando los datos para que tengan una desviación estándar de 1. Transforma cada valor mediante la fórmula del cálculo de la puntuación Z (Z-score)"
+
+msgid "Normalizer_description"
+msgstr "Proceso de preprocesamiento que ajusta el rango de los valores numéricos de tus datos a una escala estándar. Evita que las variables con magnitudes grandes dominen a las pequeñas, acelerando el entrenamiento y mejorando la precisión del modelo."
+
+msgid "warning_msg"
+msgstr ""
+"Si no se describe nombre, se elegirá uno por defecto, y si no se describe una ruta final, se guardará el archivo en la ruta del archivo inicial.\n"
+"Si no se escriben caracteristicas en rangos negativos, se ignorará."
+
+msgid "danger_msg"
+msgstr ""
+"Se debe especificar un archivo inicial y el tipo de separador para poder continuar, así como la columna objetivo y las columnas del dataset"
+
+msgid "confirm_txt_msgbox"
+msgstr "Confirmar"
+
+msgid "success_msg_msgbox"
+msgstr "Correcto!"
+
+msgid "error_msg_msgbox"
+msgstr "Error"
+
+msgid "barmenu_options_menu"
+msgstr "Opciones"
+
+msgid "barmenu_config_submenu"
+msgstr "Personalización"
+
+msgid "barmenu_help_menu"
+msgstr "Ayuda"
+
+msgid "barmenu_help_submenu"
+msgstr "? Ayuda"
+
+msgid "barmenu_about_submenu"
+msgstr "Acerca de"
+
+msgid "showAbout_txt"
+msgstr ""
+"Acerca de\n"
+"\n"
+"Desarrollado por raulRT99.\n"
+"Notebook Generator te permite crear y configurar notebooks de manera sencilla y personalizada.\n"
+"\n"
+"¿Acceder al repositorio?\n"
+"GitHub: https://github.com/raulRT-99/notbeook_generator"
+
+msgid "browse_txt"
+msgstr "Buscar"
+
+msgid "browse_directory_txt"
+msgstr "Buscar carpeta destino"
+
+msgid "browse_file_txt"
+msgstr "Buscar archivo inicial (dataset)"
+
+msgid "FOLDER-NOT-FOUND-ERROR"
+msgstr "La ruta de destino no existe o no se pudo resolver."
+
+msgid "barmenu_version_submenu"
+msgstr "Comprobar actualizaciones"
+
+msgid "AVAILABLE-VERSION-TXT"
+msgstr ""
+"Hay una versión nueva disponible. (%(version)s)\n"
+"¿Acceder al repositorio?"
+
+msgid "AVAILABLE-VERSION-TITLE-TXT"
+msgstr "Actualización disponible"
+
+msgid "UPDATED-VERSION-TXT"
+msgstr "Ya tienes la última versión."
+
+msgid "UPDATED-VERSION-TITLE-TXT"
+msgstr "Actualizado!"
+
+msgid "UPDATE-VERSION-ERROR"
+msgstr "No se pudo comprobar la versión: %(error)s"
