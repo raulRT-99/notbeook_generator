@@ -508,7 +508,7 @@ class MainWindow:
         return version_file.read_text(encoding="utf-8").strip()
 
     def get_remote_version(self):
-        url = "https://github.com/raulRT-99/notbeook_generator/tree/latets/src/notebook_generator/Config/VERSION"
+        url = "https://raw.githubusercontent.com/raulRT-99/notbeook_generator/refs/heads/in-progress/src/notebook_generator/Config/VERSION"
         resp = requests.get(url, timeout=5)
         resp.raise_for_status()
         return resp.text.strip()
