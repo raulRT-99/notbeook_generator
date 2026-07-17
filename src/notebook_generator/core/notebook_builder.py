@@ -68,17 +68,17 @@ def create_notebook(_, output_path, dataset, Notebook, multinotebook, algorithms
                 writeFile(output_path, title + '-prediction', nb)
 
     except TypeError:
-        return {False:"La ruta o el título no tienen un tipo válido."}
+        return {False:_("TYPE-ERROR-MSG")}
     except PermissionError:
-        return {False:"No tienes permisos para escribir en esa carpeta."}
+        return {False:_("PERMISSION-ERROR-MSG")}
     except FileNotFoundError:
-        return {False:"La ruta de destino no existe o no se pudo resolver."}
+        return {False:_("FILE-NOT-FOUND-ERROR-MSG")}
     except OSError as e:
-        return {False:"Error del sistema al crear o escribir el archivo"}
+        return {False:_("OSERROR-MSG")}
     except Exception as e:
-        return {False: f"Error inesperado: {e}"}
+        return {False: _("UNEXPECTED-ERROR-MSG") % {"error": str(e)}}
 
-    return {True:'trad-Archivo creado'}
+    return {True:_("NOTEBOOK-GENERATED-MSG")}
 
 def writeFile(output_path, title, nb):
     output_path = output_path + '/' + (title if title else datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + '.ipynb'
@@ -90,20 +90,20 @@ def writeFile(output_path, title, nb):
 
 
 def describe_process(_,dataset, feature_columns, target_column, resume_plots, type, nb, separator):
-    nb['cells'].append(nbf.v4.new_markdown_cell('trad-proceso de resumend e datos'))
+    nb['cells'].append(nbf.v4.new_markdown_cell(_("DESCRIBE-PROCESS-TXT")))
     nb['cells'].extend(
         describe_dataset(_,dataset, feature_columns, target_column, resume_plots,
                          type, separator))
 
 
 def preprocessing_process(_,nb, dataset, features, normalizer, negative_data, type, target, separator):
-    nb['cells'].append(nbf.v4.new_markdown_cell('trad-proceso de preprocesamiento del dataset'))
+    nb['cells'].append(nbf.v4.new_markdown_cell(_("PREPROCESSING-PROCESS-TXT")))
     nb['cells'].extend(preprocess_dataset(_,dataset, features, normalizer, negative_data, type, target, separator))
 
 
 def algorithms_process(_, algorithms):
     cells = []
-    cells.append(nbf.v4.new_markdown_cell('trad---algorithms----'))
+    cells.append(nbf.v4.new_markdown_cell(_("ML-ALGORITHMS-PROCESS-TXT")))
     for algorithm in algorithms:
         cells.append(nbf.v4.new_markdown_cell("-----------"+algorithm.name+"-----------"))
         algorithm.start_algorithm(_)
@@ -112,7 +112,6 @@ def algorithms_process(_, algorithms):
 
 
 def create_title_page(_, nb, algorithms):
-    nb['cells'].append(nbf.v4.new_markdown_cell(_('trad-Portada notebook')))
-    #nb['cells'].append(nbf.v4.new_markdown_cell('## trad-algoritmos a analizar\n- ' + '\n- '.join(algorithms.name)))
-    nb['cells'].append(nbf.v4.new_markdown_cell('trad-notas a tener en cuenta'))
+    nb['cells'].append(nbf.v4.new_markdown_cell(_("TITLE-PAGE")))
+    nb['cells'].append(nbf.v4.new_markdown_cell(_("IMPORTANT-INFO-BREFORE-RUNING")))
     return nb

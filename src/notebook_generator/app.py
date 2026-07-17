@@ -11,19 +11,8 @@ def start():
 
     _ = load_language(configFile['language'])
 
-
-
     main = MainWindow(_=_,config=configFile)
     main.run()
 
 if __name__ == "__main__":
     start()
-
-
-
-# About
-#
-# Desarrollado por [Tu Nombre].
-# Notebook Generator te permite crear y configurar notebooks de manera sencilla y personalizada.
-#
-# GitHub: https://github.com/tuusuario
