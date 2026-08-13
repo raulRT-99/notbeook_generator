@@ -54,6 +54,7 @@ class core_algorithm_process():
 
     def predict(self, _):
         #predict new
-        self.cells.append(nbf.v4.new_code_cell("nuevo_ejemplo = [[5, 120, 80, 32, 0, 35.5, 0.4, 45]]\n"
-                                               "prediccion = model.predict(nuevo_ejemplo)\n"
+        self.cells.append(nbf.v4.new_code_cell("new_dataset = [5, 120, 80, 32, 0, 35.5, 0.4, 45]  "+
+                                               _("REPLACE-WITH-NEW-DATASET")+"\n"
+                                               "prediccion = model.predict(new_dataset)\n"+
                                                "print(prediccion[0])"))

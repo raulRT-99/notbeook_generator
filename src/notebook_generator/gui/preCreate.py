@@ -29,12 +29,12 @@ def onCreate(data, _):
         dataset = data.init_file.get().strip()
 
     bool_output = data.output_folder.get() or data.output_folder.get().strip() != ''
-    if bool_output and not bool_dataset:
+    if not bool_output and bool_dataset:
         output_folder = str(Path(data.init_file.get().strip()).parent)
-    elif not bool_output:
+    elif bool_output:
         output_folder = data.output_folder.get().strip()
     else:
-        return {False: "La ruta de destino no existe o no se pudo resolver."}
+        return {False: _("FOLDER-NOT-FOUND-ERROR")}
 
     if data.file_separator_str.get() or data.file_separator_str.get().strip() != '':
         sep = data.file_separator_str.get().strip()
@@ -44,7 +44,7 @@ def onCreate(data, _):
     negative_data = data.negative_data_val.get()
     if preprocess and negative_data:
         if data.negative_feature_names.get() or data.negative_feature_names.get().strip() != '':
-            negative_features = data.negative_feature_names.get().strip()
+            negative_features = data.negative_feature_names.get().strip().split(',')
         else:
             negative_data = False
 

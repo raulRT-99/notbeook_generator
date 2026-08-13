@@ -155,7 +155,7 @@ msgid "output_name_tooltip"
 msgstr "Nombre que recibirá el notebook de Jupyter generado"
 
 msgid "output_folder_tooltip"
-msgstr "Destino del juoyter notebook"
+msgstr "Destino del jupyter notebook"
 
 msgid "init_file_tooltip"
 msgstr "Archivo csv del dataset"

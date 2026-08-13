@@ -5,6 +5,8 @@ from src.notebook_generator.gui.configuration import configurationWindow
 from gettext import gettext as _
 import webbrowser
 from ttkbootstrap.tooltip import ToolTip
+from pathlib import Path
+import requests
 
 from ttkbootstrap.dialogs import Messagebox
 
@@ -13,9 +15,10 @@ from ttkbootstrap.constants import *
 
 
 class MainWindow:
-    def __init__(self,_, config=None):
+    def __init__(self, _, config=None):
         self.config = config
         self._ = _
+        self.lang = self._("language")
         self.predict_params = {}
         self.predictionAlgorithms = {}
         self.font_size = config['font_size']
@@ -24,10 +27,10 @@ class MainWindow:
         self.ignore_rescaling = config['ignore_rescaling_size']
         # ---MAIN WINDOW---
         self.root = ttk.Window(themename=self.config['theme'])
-        self.root.title("Mi aplicación")
+        self.root.title("Notebook Generator")
         self.screen_width = min(self.font_size * 155, 1900 if not self.ignore_rescaling else 9999)
-        self.screen_height =  min(self.font_size * 90, 1000 if not self.ignore_rescaling else 9999)
-        self.root.geometry(str(self.screen_width) +"x"+ str(self.screen_height))
+        self.screen_height = min(self.font_size * 90, 1000 if not self.ignore_rescaling else 9999)
+        self.root.geometry(str(self.screen_width) + "x" + str(self.screen_height))
         style = ttk.Style()
         style.configure('.', font=('Segoe UI', self.font_size))
 
@@ -65,16 +68,17 @@ class MainWindow:
         self.row.pack(fill=X, pady=30)
 
         # ---NAME---
-        labelOutput = ttk.Label(self.row, text="Nombre de salida:", width=15)
+        labelOutput = ttk.Label(self.row, text=self._("labelOutput"), width=17,
+                                wraplength=180 + len(self._("labelOutput")))
         labelOutput.grid(row=0, column=0, padx=(0, 10), sticky="w")
         self.output_name = ttk.Entry(self.row, width=30, font=('Helvetica', self.font_size))
-        self.output_name.grid(row=0, column=1, sticky="ew", padx=(20, 10))
+        self.output_name.grid(row=0, column=1, sticky="ew", padx=(10, 50))
         # ---SELECT FOLDER---
         self.output_folder = None
         output_directory = ''
         self.output_path_var = ttk.StringVar(value=output_directory)
-        self.option_rg = ttk.Label(self.row, text="trad-select folder", padding=10)
-        self.option_rg.grid(row=0, column=2, sticky="w")
+        self.select_folder_lbl = ttk.Label(self.row, text=self._("select_folder_lbl"), padding=10)
+        self.select_folder_lbl.grid(row=0, column=2, sticky="w")
         self.create_path_row('directory')
         # ---------------------------
         self.separator1 = ttk.Separator(self.sf, bootstyle='light')
@@ -86,13 +90,13 @@ class MainWindow:
         self.init_file = None
         file_directory = ''
         self.file_path_var = ttk.StringVar(value=file_directory)
-        self.option_lf = ttk.Label(self.row2, text="trad-select file", padding=10)
-        self.option_lf.grid(row=0, column=0, sticky="w")
+        self.select_file_lbl = ttk.Label(self.row2, text=self._("select_file_lbl"), padding=10)
+        self.select_file_lbl.grid(row=0, column=0, sticky="w")
         self.create_path_row('file')
         # ---SEPARATOR IN FILE---
-        label_sep = ttk.Label(self.row2, text="trad-separator", width=15)
-        label_sep.grid(row=0, column=1, padx=(20, 10), sticky="w")
-        self.file_separator_str = ttk.Entry(self.row2, width=35)
+        separator_lbl = ttk.Label(self.row2, text=self._("separator_lbl"), width=15, wraplength=200)
+        separator_lbl.grid(row=0, column=1, padx=(20, 10), sticky="w")
+        self.file_separator_str = ttk.Entry(self.row2, width=30)
         self.file_separator_str.grid(row=0, column=2, sticky="ew", padx=(0, 10))
         # ---------------------------
         self.separator2 = ttk.Separator(self.sf, bootstyle='light')
@@ -101,23 +105,31 @@ class MainWindow:
         row3 = ttk.Frame(self.sf)
         row3.pack(fill=X, pady=30)
         # ---TYPE OF DATASET---
-        label_sep = ttk.Label(row3, text="trad-type of dataset", width=20)
-        label_sep.grid(row=0, column=0, padx=(0, 10), sticky="w")
-        self.dataframe_type_map = {
+        dataset_type_lbl = ttk.Label(row3, text=self._("dataset_type_lbl"), width=20)
+        dataset_type_lbl.grid(row=0, column=0, padx=(0, 10), sticky="w")
+
+        dataframe_type_map_es = {
             "Clasificación": "classification",
             "Regresión": "regression"
         }
+        dataframe_type_map_en = {
+            "Classification": "classification",
+            "Regression": "regression"
+        }
+
+        self.dataframe_type_map = dataframe_type_map_es if self.lang == 'es' else dataframe_type_map_en
         self.dftype_cb = ttk.Combobox(row3, values=list(self.dataframe_type_map.keys()), state="readonly",
                                       font=('Helvetica', self.font_size))
         self.dftype_cb.grid(row=0, column=1, sticky="ew", padx=(20, 10))
         self.dftype_cb.current(0)
         # ---FEATURES---
-        labelFeatures = ttk.Label(row3, text="trad-features:", width=12)
+        labelFeatures = ttk.Label(row3, text=self._("labelFeatures"), width=15,
+                                  wraplength=160 + len(self._("labelFeatures")))
         labelFeatures.grid(row=0, column=2, padx=(20, 5), sticky="w")
-        self.feature_names = ttk.Entry(row3, width=70, font=('Helvetica', self.font_size))
+        self.feature_names = ttk.Entry(row3, width=65, font=('Helvetica', self.font_size))
         self.feature_names.grid(row=0, column=3, sticky="ew", padx=(20, 10))
         # ---TARGET CLASS---
-        labelTarget = ttk.Label(row3, text="trad-target:", width=12)
+        labelTarget = ttk.Label(row3, text=self._("labelTarget"), width=15)
         labelTarget.grid(row=1, column=0, padx=(0, 10), sticky="w", pady=(30, 0))
         self.target_feature = ttk.Entry(row3, width=25, font=('Helvetica', self.font_size))
         self.target_feature.grid(row=1, column=1, sticky="ew", padx=(0, 10), pady=(30, 0))
@@ -132,14 +144,15 @@ class MainWindow:
         # --DESCRIBE?--
         self.enable_resume = ttk.Checkbutton(
             row4,
-            text="trad-Describe data",
+            text=self._("enable_resume_txt"),
             variable=self.describe_val,
             command=lambda: self.toggle_enable_cb_options(self.describe_val, self.enable_describe_options_frame, 1)
         )
         # --RESUME PLOTS--
         self.enable_resume.grid(row=0, column=0, padx=5, pady=5, sticky='w')
         self.enable_describe_options_frame = ttk.Frame(row4)
-        ttk.Label(self.enable_describe_options_frame, text="trad-Number of plots").grid(row=0, column=0, padx=5, pady=5)
+        ttk.Label(self.enable_describe_options_frame, text=self._("plots_number_lbl")).grid(row=0, column=0, padx=5,
+                                                                                            pady=5)
         self.resume_plots_cb = ttk.Combobox(self.enable_describe_options_frame, values=[0, 1, 2, 3, 4],
                                             state="readonly", font=('Helvetica', self.font_size))
         self.resume_plots_cb.grid(row=0, column=1, padx=5, pady=5)
@@ -151,7 +164,7 @@ class MainWindow:
         self.preprocessing_val = ttk.BooleanVar(row5, value=False)
         self.enable_preprocessing = ttk.Checkbutton(
             row5,
-            text="trad-Enable preprocessing",
+            text=self._("enable_preprocessing_txt"),
             variable=self.preprocessing_val,
             command=lambda: (self.toggle_enable_cb_options(self.preprocessing_val,
                                                            self.enable_preprocessing_options_frame, 1),
@@ -162,8 +175,9 @@ class MainWindow:
         # --NORMALIZING TYPE--
         self.enable_preprocessing.grid(row=0, column=0, padx=5, pady=5, sticky='w')
         self.enable_preprocessing_options_frame = ttk.Frame(row5)
-        ttk.Label(self.enable_preprocessing_options_frame, text="trad-Normalize type").grid(row=0, column=0, padx=5,
-                                                                                            pady=5, sticky='w')
+        ttk.Label(self.enable_preprocessing_options_frame, text=self._("normalize_type_lbl")).grid(row=0, column=0,
+                                                                                                   padx=5,
+                                                                                                   pady=5, sticky='w')
         self.normalize_type_cb = ttk.Combobox(self.enable_preprocessing_options_frame,
                                               values=['MinMaxScaler', 'StandardScaler', 'Normalizer'],
                                               state="readonly", font=('Helvetica', self.font_size))
@@ -179,7 +193,7 @@ class MainWindow:
         self.negative_data_val = ttk.BooleanVar(self.enable_preprocessing_options_frame, value=False)
         self.enable_negative_data = ttk.Checkbutton(
             self.enable_preprocessing_options_frame,
-            text="trad-Enable negative data",
+            text=self._("negative_data_txt"),
             variable=self.negative_data_val,
             command=lambda: self.toggle_enable_cb_options(self.negative_data_val,
                                                           self.enable_negative_data_options_frame, 3)
@@ -187,7 +201,8 @@ class MainWindow:
         self.enable_negative_data_options_frame = ttk.Frame(row5)
         self.enable_negative_data.grid(row=2, column=0, padx=5, pady=5, sticky='w')
         # NEGATIVE FEATURES
-        labelNegativeFeatures = ttk.Label(self.enable_negative_data_options_frame, text="trad-features:", width=12)
+        labelNegativeFeatures = ttk.Label(self.enable_negative_data_options_frame, text=self._("labelNegativeFeatures"),
+                                          width=15, wraplength=200)
         labelNegativeFeatures.grid(row=0, column=0, padx=5, sticky="w")
         self.negative_feature_names = ttk.Entry(self.enable_negative_data_options_frame, width=60,
                                                 font=('Helvetica', self.font_size))
@@ -200,11 +215,13 @@ class MainWindow:
         row6 = ttk.Frame(self.sf)
         row6.pack(fill=X, pady=30)
         self.feature_selection_val = ttk.BooleanVar(row6, value=False)
-        self.enable_feature_selection = ttk.Checkbutton(row6,variable=self.feature_selection_val, text="trad-Enable feature selection")
+        self.enable_feature_selection = ttk.Checkbutton(row6, variable=self.feature_selection_val,
+                                                        text=self._("feature_selection_txt"))
         self.enable_feature_selection.grid(row=0, column=0, padx=5, pady=5)
         # ---MULTINOTEBOOK---
         self.multinotebook_val = ttk.BooleanVar(row6, value=False)
-        self.enable_multinotebook = ttk.Checkbutton(row6,variable=self.multinotebook_val, text="trad-multinotebook")
+        self.enable_multinotebook = ttk.Checkbutton(row6, variable=self.multinotebook_val,
+                                                    text=self._("multinotebook_txt"))
         self.enable_multinotebook.grid(row=0, column=2, padx=(50, 0), pady=5)
         # -----------------------
         row7 = ttk.Frame(self.sf)
@@ -213,7 +230,7 @@ class MainWindow:
         self.prediction_val = ttk.BooleanVar(row4, value=False)
         self.enable_prediction = ttk.Checkbutton(
             row7,
-            text="trad-Enable prediction",
+            text=self._("predictions_txt"),
             variable=self.prediction_val,
             command=lambda: self.toggle_enable_cb_options(self.prediction_val, self.enable_prediction_options, 1)
         )
@@ -232,36 +249,39 @@ class MainWindow:
         row7.columnconfigure(1, weight=0)
         row7.columnconfigure(2, weight=0)
         row7.columnconfigure(3, weight=1)
-        self.validate_btn = ttk.Button(row7, text='trad-validar', bootstyle='primary', command=self.onValidate,
+        self.validate_btn = ttk.Button(row7, text=self._("VALIDATE-BTN"), bootstyle='primary', command=self.onValidate,
                                        width=20)
         self.validate_btn.grid(column=0, row=0, padx=(200, 10))
-        self.create_nb_btn = ttk.Button(row7, text='trad-crear notebook', bootstyle='secondary',
+        self.create_nb_btn = ttk.Button(row7, text=self._("CREATE-NOTEBOOK-BTN"), bootstyle='secondary',
                                         command=lambda: self.onCreateNotebook(_),
                                         width=20, state='disable')
         self.create_nb_btn.grid(column=1, row=0, padx=(10, 0))
-        #---TOOLTIPS---
+        # ---TOOLTIPS---
         if not self.config['ignore_tooltips']:
             self.tooltips()
 
     def tooltips(self):
         delay = 700
-        wraplenght = 600
-        ToolTip(self.output_name, text="trad-nombre del archivo final", delay=delay, wraplength=wraplenght)
-        ToolTip(self.output_folder, text="trad-nombre de la carpeta donde guardar", delay=delay, wraplength=wraplenght)
-        ToolTip(self.init_file, text="trad-nombre del archivo inicial", delay=delay, wraplength=wraplenght)
-        ToolTip(self.dftype_cb, text="trad-tipo de dataset", delay=delay, wraplenght=wraplenght)
-        ToolTip(self.file_separator_str, text="trad-separador del archivo", delay=delay, wraplength=wraplenght)
-        ToolTip(self.target_feature, text="trad-nombre de la columna objetivo", delay=delay, wraplength=wraplenght)
-        ToolTip(self.feature_names, text="trad-nombre de las columnas", delay=delay, wraplength=wraplenght)
-        ToolTip(self.enable_resume, text="trad-habiliat resumen de dataset", delay=delay, wraplength=wraplenght)
-        ToolTip(self.enable_preprocessing, text="trad-habilitar preprocesamiento", delay=delay, wraplength=wraplenght)
-        ToolTip(self.enable_negative_data, text="trad-habilitar preprocesamiento negativo de datos", delay=delay, wraplength=wraplenght)
-        ToolTip(self.negative_feature_names, text="trad-colmnas negativas a preprocesar", delay=delay, wraplength=wraplenght)
-        ToolTip(self.enable_feature_selection, text="trad-habiliatr feature selection", delay=delay, wraplength=wraplenght)
-        ToolTip(self.enable_multinotebook, text="trad-habiliat multinotebook", delay=delay, wraplength=wraplenght)
-        ToolTip(self.enable_prediction, text="trad-habiliat predicciones-ver documentacion", delay=delay, wraplength=wraplenght)
-
-
+        wraplenght = 700
+        ToolTip(self.output_name, text=self._("output_name_tooltip"), delay=delay, wraplength=wraplenght)
+        ToolTip(self.output_folder, text=self._("output_folder_tooltip"), delay=delay, wraplength=wraplenght)
+        ToolTip(self.init_file, text=self._("init_file_tooltip"), delay=delay, wraplength=wraplenght)
+        ToolTip(self.dftype_cb, text=self._("dftype_cb_tooltip"), delay=delay, wraplength=wraplenght)
+        ToolTip(self.file_separator_str, text=self._("file_separator_str_tooltip"), delay=delay, wraplength=wraplenght)
+        ToolTip(self.target_feature, text=self._("target_column_tooltip"), delay=delay, wraplength=wraplenght)
+        ToolTip(self.feature_names, text=self._("feature_names_tooltip"), delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_resume, text=self._("enable_resume_tooltip"), delay=delay, wraplength=wraplenght)
+        ToolTip(self.enable_preprocessing, text=self._("enable_preprocessing_tooltip"), delay=delay,
+                wraplength=wraplenght)
+        ToolTip(self.enable_negative_data, text=self._("enable_negative_data_tooltip"), delay=delay,
+                wraplength=wraplenght)
+        ToolTip(self.negative_feature_names, text=self._("negative_feature_names_tooltip"), delay=delay,
+                wraplength=wraplenght)
+        ToolTip(self.enable_feature_selection, text=self._("enable_feature_selection_tooltip"), delay=delay,
+                wraplength=wraplenght)
+        ToolTip(self.enable_multinotebook, text=self._("enable_multinotebook_tooltip"), delay=delay,
+                wraplength=wraplenght)
+        ToolTip(self.enable_prediction, text=self._("enable_prediction_tooltip"), delay=delay, wraplength=wraplenght)
 
     def predictionSettings(self, frame):
         self.predict_params = {}
@@ -371,11 +391,11 @@ class MainWindow:
         text = ''
         match self.normalize_type_cb.get():
             case 'MinMaxScaler':
-                text = 'trad-minmaxscaler text descaa aaaaaaaaaa aaaaaaaa aaaaa aa aaaaa aaa aaaaaaa aaa'
+                text = self._("MinMaxScaler_description")
             case 'StandardScaler':
-                text = 'trad-standarscaler text de scbbbbb bbbbbbb bbbb bbbb bbbbbbb bbbbbbbbbb bbb bbbbb bbbbbbbb bb bbbb bbbb'
+                text = self._("StandardScaler_description")
             case 'Normalizer':
-                text = 'trad-normalizer text descc cccc ccc ccccc cc ccc cc cccc cccccccc ccccc cc cc c c ccc c ccccccc cccc ccccccccccccccccc'
+                text = self._("Normalizer_description")
         self.describe_normalizing_type_lbl.config(text=text)
 
     def onCreateNotebook(self, _):
@@ -385,12 +405,12 @@ class MainWindow:
             match self.create_btn_style:
                 case 'warning':
                     answer = Messagebox.yesno(
-                        'trad-si no se describe nombre se elegira uno por defecto y si no se describe una ruta final se guardara el archivo en la ruta del archivo inicial\nsi no se escriben features negativos se ignorara',
-                        'trad-confirmar')
+                        self._("warning_msg"),
+                        self._("confirm_txt_msgbox"))
                 case 'danger':
                     answer = Messagebox.yesno(
-                        'trad-se debe especificar un archivo inicial y el tipo de separador para poder continuar\nasi como la columna target y las columnas de features',
-                        'trad-confirmar')
+                        self._("danger_msg"),
+                        self._("confirm_txt_msgbox"))
 
             if (answer == 'Yes' or answer == 'Sí') or self.create_btn_style == 'success':
                 response = onCreate(self, _)
@@ -401,9 +421,9 @@ class MainWindow:
 
     def showResponseMsg(self, response):
         if True in response:
-            Messagebox.show_info(response[True],'trad-todo correcto')
+            Messagebox.show_info(response[True], self._("success_msg_msgbox"))
         else:
-            Messagebox.show_error(response[False], 'Error')
+            Messagebox.show_error(response[False], self._("error_msg_msgbox"))
 
     def onValidate(self):
         warning_bool = not self.output_name.get() or self.output_name.get().strip() == '' or not self.output_folder.get() or self.output_folder.get().strip() == ''
@@ -457,64 +477,102 @@ class MainWindow:
         rowX.pack(side=TOP, fill=X, expand=YES)
 
         # ---MENU 1---
-        menu1 = ttk.Menubutton(rowX, text="Opciones", bootstyle='dark')
+        menu1 = ttk.Menubutton(rowX, text=self._("barmenu_options_menu"), bootstyle='dark')
         menu1.grid(row=0, column=0, sticky='w')
         submenu1 = ttk.Menu(menu1, tearoff=0)
-        submenu1.add_command(label="Personalizacion", command=lambda: configurationWindow(translator=self._, config=self.config), font=('Segoe UI', self.font_size-1))
+        submenu1.add_command(label=self._("barmenu_config_submenu"),
+                             command=lambda: configurationWindow(translator=self._, config=self.config),
+                             font=('Segoe UI', self.font_size - 1))
         submenu1.add_command(label="---------------", font=('Segoe UI', self.font_size - 1), state="disabled")
-        submenu1.add_command(label="Salir", command=lambda: self.root.quit(), font=('Segoe UI', self.font_size-1))
+        submenu1.add_command(label="Salir", command=lambda: self.root.quit(), font=('Segoe UI', self.font_size - 1))
         menu1["menu"] = submenu1
 
         # ---MENU 2---
-        menu2 = ttk.Menubutton(rowX, text="Ayuda", bootstyle='dark')
+        menu2 = ttk.Menubutton(rowX, text=self._("barmenu_help_menu"), bootstyle='dark')
         menu2.grid(row=0, column=1, sticky='w')
         submenu2 = ttk.Menu(menu2, tearoff=0)
-        submenu2.add_command(label="? Ayuda", command=self.openDocumentation, font=('Segoe UI', self.font_size-1))
-        submenu2.add_command(label="About", command=self.showAbout, font=('Segoe UI', self.font_size-1))
+        submenu2.add_command(label=self._("barmenu_help_submenu"), command=self.openDocumentation,
+                             font=('Segoe UI', self.font_size - 1))
+        submenu2.add_command(label=self._("barmenu_about_submenu"), command=self.showAbout,
+                             font=('Segoe UI', self.font_size - 1))
+        submenu2.add_command(label=self._("barmenu_version_submenu"), command=self.on_check_update,
+                             font=('Segoe UI', self.font_size - 1))
         menu2["menu"] = submenu2
 
     def openDocumentation(self):
-        pass
+        url = "https://github.com/raulRT-99/notbeook_generator/wiki"
+        webbrowser.open(url)
+
+    def get_local_version(self):
+        version_file = Path('./Config/VERSION')
+        return version_file.read_text(encoding="utf-8").strip()
+
+    def get_remote_version(self):
+        url = "https://raw.githubusercontent.com/raulRT-99/notbeook_generator/refs/heads/in-progress/src/notebook_generator/Config/VERSION"
+        resp = requests.get(url, timeout=5)
+        resp.raise_for_status()
+        return resp.text.strip()
+
+    def is_update_available(self):
+        local = self.get_local_version()
+        remote = self.get_remote_version()
+        return local != remote, remote
+
+    def on_check_update(self):
+        try:
+            available, version = self.is_update_available()
+            if available:
+                answer = Messagebox.yesno(self._("AVAILABLE-VERSION-TXT") % {"version": version}, self._("AVAILABLE-VERSION-TITLE-TXT"))
+                if answer == "Yes"  or answer == "Sí":
+                    self.goToRepository()
+            else:
+                Messagebox.show_info(self._("UPDATED-VERSION-TXT"), self._("UPDATED-VERSION-TITLE-TXT"))
+        except Exception as e:
+            Messagebox.show_error(self._("UPDATE-VERSION-ERROR") % {"error":e}, "ERROR")
 
     def showAbout(self):
-        msg = Messagebox.okcancel('trad-proyecto open source para jupyter norebooks\ndesea ir al repositoprio de github?','about')
+        msg = Messagebox.okcancel(
+            "Version: " + self.get_local_version() + "\n\n" + self._("showAbout_txt"), self._("barmenu_about_submenu"))
         if msg == 'OK':
-            url = "https://github.com/raulRT-99/notbeook_generator"
-            webbrowser.open(url)
+            self.goToRepository()
 
+    def goToRepository(self):
+        url = "https://github.com/raulRT-99/notbeook_generator"
+        webbrowser.open(url)
 
     def create_path_row(self, type):
         if type == 'directory':
-            output_path_row = ttk.Frame(self.option_rg)
+            output_path_row = ttk.Frame(self.select_folder_lbl)
             output_path_row.grid(row=0, column=0, sticky="ew")
             path_lbl = ttk.Label(output_path_row,
-                                 text="trad-Ubicacion final",
-                                 width=20)
+                                 text=self._("select_folder_lbl"),
+                                 width=15)
             path_lbl.grid(row=0, column=0, padx=(0, 10), pady=5, sticky="w")
             self.output_folder = ttk.Entry(output_path_row, textvariable=self.output_path_var, width=50,
                                            font=('Helvetica', self.font_size))
             self.output_folder.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
             browse_btn = ttk.Button(
                 output_path_row,
-                text="tradBrowse",
+                text=self._("browse_txt"),
                 command=lambda: self.on_browse(type),
                 width=self.font_size
             )
             browse_btn.grid(row=0, column=2, padx=5, pady=5, sticky="w")
             output_path_row.columnconfigure(1, weight=1)
         else:
-            file_path_row = ttk.Frame(self.option_lf)
+            file_path_row = ttk.Frame(self.select_file_lbl)
             file_path_row.grid(row=0, column=0, sticky="ew")
             path_lbl = ttk.Label(file_path_row,
-                                 text='trad-Ubicacion archivo',
-                                 width=20)
+                                 text=self._("select_file_lbl"),
+                                 width=20,
+                                 wraplength=200 + len(self._("select_file_lbl")))
             path_lbl.grid(row=0, column=0, padx=(0, 10), pady=5, sticky="w")
             self.init_file = ttk.Entry(file_path_row, textvariable=self.file_path_var, width=50,
                                        font=('Helvetica', self.font_size))
             self.init_file.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
             browse_btn = ttk.Button(
                 file_path_row,
-                text="tradBrowse",
+                text=self._("browse_txt"),
                 command=lambda: self.on_browse(type),
                 width=self.font_size
             )
@@ -523,11 +581,11 @@ class MainWindow:
 
     def on_browse(self, type):
         if type == 'directory':
-            path = askdirectory(title="trad-Browse directory")
+            path = askdirectory(title=self._("browse_directory_txt"))
             self.output_path_var.set(path)
         else:
             path = askopenfilename(
-                title="trad-Selecciona un archivo",
+                title=self._("browse_file_txt"),
                 filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
             )
             self.file_path_var.set(path)

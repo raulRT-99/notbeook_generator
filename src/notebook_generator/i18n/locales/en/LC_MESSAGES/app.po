@@ -3,5 +3,275 @@ msgstr ""
 "Language: en\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-msgid "Portada notebook"
-msgstr "# This is the cover of the notebook"
+msgid "language"
+msgstr "en"
+
+msgid "TYPE-ERROR-MSG"
+msgstr "The path or title do not have a valid type."
+
+msgid "PERMISSION-ERROR-MSG"
+msgstr "You do not have permission to write to that folder."
+
+msgid "FILE-NOT-FOUND-ERROR-MSG"
+msgstr "The destination path does not exist or could not be resolved."
+
+msgid "OSERROR-MSG"
+msgstr "System error while creating or writing the file."
+
+msgid "UNEXPECTED-ERROR-MSG"
+msgstr "Unexpected error: %(error)s"
+
+msgid "NOTEBOOK-GENERATED-MSG"
+msgstr "File generated successfully!"
+
+msgid "ALGORITHM-PROCESS-TITLE"
+msgstr "-----ALGORITHMS-----"
+
+msgid "TITLE-PAGE"
+msgstr ""
+"# Notebook Generator\n"
+"---\n"
+"\n"
+"## Description\n"
+"This notebook was generated with **Notebook Generator**, a desktop tool developed in Python that allows you to create and customize notebooks quickly and consistently from a predefined configuration.\n"
+"\n"
+"The goal is to simplify the creation of notebooks with:\n"
+"- Standard structure (sections, titles, templates).\n"
+"- Customizable configuration (theme, language, font size).\n"
+"- Integration with data analysis or technical documentation workflows.\n"
+"\n"
+"---"
+
+msgid "IMPORTANT-INFO-BREFORE-RUNING"
+msgstr "> It is important to keep in mind that this automatically generated notebook is not intended to replace a data analyst, since the processed information still needs to be analyzed and reviewed by a specialist. It is recommended to review both the code and the results before using them for decision-making."
+
+msgid "DESCRIBE-PROCESS-TXT"
+msgstr "# Data summary and description phase"
+
+msgid "PREPROCESSING-PROCESS-TXT"
+msgstr "# Preprocessing and normalization phase"
+
+msgid "ML-ALGORITHMS-PROCESS-TXT"
+msgstr "# Training and prediction phase"
+
+msgid "NEW-PREPROCESSED-DATASET"
+msgstr "#If you want to generate a new dataset with the preprocessed information, run this line"
+
+msgid "YEO-JHONNSON-MSG"
+msgstr "#Negative values must be processed with Yeo Johnson"
+
+msgid "REPLACE-WITH-NEW-DATASET"
+msgstr "#Replace with a new dataset"
+
+msgid "ALGORITHMS-COMPARISON"
+msgstr "Comparison between algorithms"
+
+msgid "PERSONALIZATION-GUI-TITLE"
+msgstr "Customization"
+
+msgid "CANCEL-BTN"
+msgstr "Cancel"
+
+msgid "SAVE-BTN"
+msgstr "Save"
+
+msgid "RESTART-APP-MSG"
+msgstr "You need to restart the application for the changes to take effect."
+
+msgid "fontszie-lbl"
+msgstr "Font size"
+
+msgid "theme-lbl"
+msgstr "Theme"
+
+msgid "language-lbl"
+msgstr "Language"
+
+msgid "ignore-warnings-lbl"
+msgstr "Ignore warnings when creating"
+
+msgid "ignore-tooltips-lbl"
+msgstr "Ignore help messages"
+
+msgid "ignore-rescaling-lbl"
+msgstr "Ignore rescaling based on font size"
+
+msgid "labelOutput"
+msgstr "Final file name"
+
+msgid "select_folder_lbl"
+msgstr "Destination folder"
+
+msgid "select_file_lbl"
+msgstr "File to analyze (dataset)"
+
+msgid "separator_lbl"
+msgstr "Column separator"
+
+msgid "dataset_type_lbl"
+msgstr "Analysis type"
+
+msgid "labelFeatures"
+msgstr "Dataset columns"
+
+msgid "labelTarget"
+msgstr "Target column"
+
+msgid "enable_resume_txt"
+msgstr "Enable dataset description"
+
+msgid "plots_number_lbl"
+msgstr "Number of plots to display"
+
+msgid "enable_preprocessing_txt"
+msgstr "Enable data preprocessing"
+
+msgid "normalize_type_lbl"
+msgstr "Normalization type"
+
+msgid "negative_data_txt"
+msgstr "Data with negative values?"
+
+msgid "labelNegativeFeatures"
+msgstr "Columns with negative values"
+
+msgid "feature_selection_txt"
+msgstr "Enable automatic feature selection"
+
+msgid "multinotebook_txt"
+msgstr "Multiple notebooks?"
+
+msgid "predictions_txt"
+msgstr "Enable predictions"
+
+msgid "VALIDATE-BTN"
+msgstr "Validate fields"
+
+msgid "CREATE-NOTEBOOK-BTN"
+msgstr "Create notebook"
+
+msgid "output_name_tooltip"
+msgstr "Name that the generated Jupyter notebook will receive."
+
+msgid "output_folder_tooltip"
+msgstr "Destination of the Jupyter notebook."
+
+msgid "init_file_tooltip"
+msgstr "CSV file of the dataset."
+
+msgid "dftype_cb_tooltip"
+msgstr "Type of supervised learning task."
+
+msgid "file_separator_str_tooltip"
+msgstr "Dataset column separator.\nExamples: comma (,), tab (\\t), semicolon (;), \\r, \\r\\n, etc."
+
+msgid "feature_names_tooltip"
+msgstr "Dataset columns, separated by commas (,)."
+
+msgid "target_column_tooltip"
+msgstr "Dataset column to process and predict."
+
+msgid "enable_resume_tooltip"
+msgstr "Adds a data description of the dataset to the notebook."
+
+msgid "enable_preprocessing_tooltip"
+msgstr "Adds data preprocessing algorithms to the notebook."
+
+msgid "enable_negative_data_tooltip"
+msgstr "If your dataset has values in negative ranges, select this option."
+
+msgid "negative_feature_names_tooltip"
+msgstr "Columns with values in negative ranges, separated by commas (,)."
+
+msgid "enable_feature_selection_tooltip"
+msgstr "Adds algorithms for automatic selection of the best features (columns) to the notebook."
+
+msgid "enable_multinotebook_tooltip"
+msgstr "If you select this option, each learning phase will be separated into its own Jupyter notebook; otherwise everything will be generated within the same file."
+
+msgid "enable_prediction_tooltip"
+msgstr "Add machine learning algorithms for data prediction."
+
+msgid "MinMaxScaler_description"
+msgstr "Scales and transforms each feature individually to a specific range (by default, between 0 and 1). It is ideal for algorithms sensitive to distances, such as neural networks or K-Nearest Neighbors (KNN)."
+
+msgid "StandardScaler_description"
+msgstr "Tool that standardizes numerical features by removing the mean and scaling the data so they have a standard deviation of 1. It transforms each value using the Z-score formula."
+
+msgid "Normalizer_description"
+msgstr "Preprocessing step that adjusts the range of numerical values in your data to a standard scale. It prevents variables with large magnitudes from dominating smaller ones, speeding up training and improving model accuracy."
+
+msgid "warning_msg"
+msgstr ""
+"If no name is provided, a default one will be chosen, and if no final path is specified, the file will be saved in the initial file's path.\n"
+"If no features in negative ranges are specified, they will be ignored."
+
+msgid "danger_msg"
+msgstr ""
+"You must specify an initial file and the separator type to continue, as well as the target column and the dataset columns."
+
+msgid "confirm_txt_msgbox"
+msgstr "Confirm"
+
+msgid "success_msg_msgbox"
+msgstr "Success!"
+
+msgid "error_msg_msgbox"
+msgstr "Error"
+
+msgid "barmenu_options_menu"
+msgstr "Options"
+
+msgid "barmenu_config_submenu"
+msgstr "Customization"
+
+msgid "barmenu_help_menu"
+msgstr "Help"
+
+msgid "barmenu_help_submenu"
+msgstr "? Help"
+
+msgid "barmenu_about_submenu"
+msgstr "About"
+
+msgid "showAbout_txt"
+msgstr ""
+"About\n"
+"\n"
+"Developed by raulRT99.\n"
+"Notebook Generator allows you to create and configure notebooks easily and in a customized way.\n"
+"\n"
+"Open the repository?\n"
+"GitHub: https://github.com/raulRT-99/notbeook_generator"
+
+msgid "browse_txt"
+msgstr "Browse"
+
+msgid "browse_directory_txt"
+msgstr "Browse destination folder"
+
+msgid "browse_file_txt"
+msgstr "Browse initial file (dataset)"
+
+msgid "FOLDER-NOT-FOUND-ERROR"
+msgstr "The destination path does not exist or could not be resolved."
+
+msgid "barmenu_version_submenu"
+msgstr "Check for updates"
+
+msgid "AVAILABLE-VERSION-TXT"
+msgstr ""
+"There is a new version available. (%(version)s)\n"
+"Open the repository?"
+
+msgid "AVAILABLE-VERSION-TITLE-TXT"
+msgstr "Update available"
+
+msgid "UPDATED-VERSION-TXT"
+msgstr "You already have the latest version."
+
+msgid "UPDATED-VERSION-TITLE-TXT"
+msgstr "Up to date!"
+
+msgid "UPDATE-VERSION-ERROR"
+msgstr "Could not check the version: %(error)s"

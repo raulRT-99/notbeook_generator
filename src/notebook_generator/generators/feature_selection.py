@@ -43,11 +43,11 @@ def selection(_,dataset, features, type, target, separator):
                                                                                             "Y_df = dataframe.iloc[:, 4]"))
 
     cells.extend(correlation_plot(target_string))
-    cells.extend(features_high_corr(target_string))
+    cells.extend(features_high_corr(_,target_string))
     if not target_string:
-        cells.extend(backward_elimination())
-    cells.extend(select_best(target_string))
-    cells.extend(recursive_elimination(num_features, target_string))
+        cells.extend(backward_elimination(_))
+    cells.extend(select_best(_,target_string))
+    cells.extend(recursive_elimination(_,num_features, target_string))
 
     return cells
 
@@ -61,7 +61,7 @@ def correlation_plot(target_string):
     return cells
 
 
-def features_high_corr(target_string):
+def features_high_corr(_,target_string):
     cells = []
     dataset = "dataframe" if not target_string else "X_df"
     cells.append(nbf.v4.new_code_cell("corr_matrix = " + dataset + ".corr().abs()\n"
@@ -69,26 +69,25 @@ def features_high_corr(target_string):
                                                                    "to_drop = [column for column in upper.columns if any(upper[column] > 0.75)]\n"
                                                                    "df_selected=" + dataset + ".drop(" + dataset + "[to_drop], axis=1)\n"
                                                                                                                    "df_selected"))
-    cells.append(nbf.v4.new_code_cell("#trad-texto para decir si quiere un nuevo csv con la data preprocesada\n"
-                                      "import os\n"
-                                      "df_selected.to_csv('data_feature_selection.csv', index=False)"))
+
+    preprocessedDataset(cells, _)
     return cells
 
 
-def backward_elimination():
+def backward_elimination(_):
     cells = []
     cells.append(nbf.v4.new_code_cell("X_1 = sm.add_constant(X_df)\n"
                                       "model = sm.OLS(Y_df, X_1).fit()\n"
                                       "keep_indices = np.where(model.pvalues[1:] <= 0.05)[0]\n"
                                       "X_df_selected = X_df[:, keep_indices]\n"
                                       "X_df_selected"))
-    cells.append(nbf.v4.new_code_cell("#trad-texto para decir si quiere un nuevo csv con la data preprocesada\n"
-                                      "import os\n"
-                                      "df_selected.to_csv('data_feature_selection.csv', index=False)"))
+
+    preprocessedDataset(cells, _)
+
     return cells
 
 
-def select_best(target_string):
+def select_best(_,target_string):
     cells = []
     dataset = "dataframe" if not target_string else "X_df"
     text_code = ("from sklearn.feature_selection import SelectKBest\n"
@@ -106,13 +105,11 @@ def select_best(target_string):
                       "selected_cols = feature_cols[mask]\n"
                       "df_selected")
     cells.append(nbf.v4.new_code_cell(text_code))
-    cells.append(nbf.v4.new_code_cell("#trad-texto para decir si quiere un nuevo csv con la data preprocesada\n"
-                                      "import os\n"
-                                      "df_selected.to_csv('data_feature_selection.csv', index=False)"))
+    preprocessedDataset(cells, _)
     return cells
 
 
-def recursive_elimination(num_features, target_string):
+def recursive_elimination(_,num_features, target_string):
     cells = []
     percent_features = 0.6
     dataset = "dataframe" if not target_string else "X_df"
@@ -132,7 +129,13 @@ def recursive_elimination(num_features, target_string):
                       "df_selected = dataframe[selected_cols]\n"
                       "df_selected")
     cells.append(nbf.v4.new_code_cell(text_code))
-    cells.append(nbf.v4.new_code_cell("#trad-texto para decir si quiere un nuevo csv con la data preprocesada\n"
-                                      "import os\n"
-                                      "df_selected.to_csv('data_feature_selection.csv', index=False)"))
+
+    preprocessedDataset(cells, _)
+
     return cells
+
+
+def preprocessedDataset(cells,_):
+    cells.append(nbf.v4.new_code_cell(_("NEW-PREPROCESSED-DATASET") + "\n" +
+                                      "import os\n" +
+                                      "df_selected.to_csv('data_feature_selection.csv', index=False)"))

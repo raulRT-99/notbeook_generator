@@ -5,9 +5,35 @@ from ttkbootstrap.dialogs import Messagebox
 
 import ttkbootstrap as ttk
 
+from pathlib import Path
+import shutil
+import sys
+
+
+# Carpeta donde está el .exe o app.py
+APP_DIR = Path(sys.argv[0]).resolve().parent
+
+# Carpeta temporal/interna donde Nuitka incluyó los recursos
+BUNDLED_DIR = Path(__file__).resolve().parent
+
+# Configuración externa, junto al ejecutable
+EXTERNAL_CONFIG_DIR = APP_DIR / "Config"
+EXTERNAL_CONFIG_FILE = EXTERNAL_CONFIG_DIR / "user_config.yml"
+
+# Configuración incluida dentro del programa como plantilla inicial
+BUNDLED_CONFIG_FILE = BUNDLED_DIR / "Config" / "user_config.yml"
+
+# Crear la carpeta externa si no existe
+EXTERNAL_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+
+# Copiar la configuración inicial solo la primera vez
+if not EXTERNAL_CONFIG_FILE.exists() and BUNDLED_CONFIG_FILE.exists():
+    shutil.copy2(BUNDLED_CONFIG_FILE, EXTERNAL_CONFIG_FILE)
+
+CONFIG_FILE = EXTERNAL_CONFIG_FILE
 
 class configurationWindow:
-    def __init__(self, translator, config):
+    def __init__(self, translator, config=None):
         self.params = {}
         self.config = config
         self.font_size = self.config['font_size']
@@ -15,7 +41,7 @@ class configurationWindow:
         self.create_btn_style = 'secondary'
         # ---CONFIGURATION WINDOW---
         self.root = ttk.Toplevel()
-        self.root.title("Personalizacion")
+        self.root.title(self._("PERSONALIZATION-GUI-TITLE"))
         self.screen_width = self.font_size * 155
         self.root.geometry(str(self.screen_width // 2) + "x800")
         style = ttk.Style()
@@ -23,7 +49,10 @@ class configurationWindow:
         self.row1 = ttk.Frame(self.root)
         self.row1.pack(fill=X, pady=50, padx=50)
 
-        with open('Config/user_config.yml', 'r', encoding='utf-8') as f:
+        BASE_DIR = Path(__file__).resolve().parent.parent
+        CONFIG_FILE = BASE_DIR / "Config" / "user_config.yml"
+
+        with CONFIG_FILE.open("r", encoding="utf-8") as f:
             self.configFile = yaml.safe_load(f)
 
         # ----AVALIABLE OPTIONS----
@@ -53,35 +82,35 @@ class configurationWindow:
                                    'language': self.languages}
         self.config_options = {
             'font_size': {
-                'label': 'trad-fontszie',
+                'label': 'fontszie-lbl',
                 'menu': 'combobox',
                 'options': self.fontsizes,
                 'default': self.configFile['font_size']
             },
             'theme': {
-                'label': 'trad-theme',
+                'label': 'theme-lbl',
                 'menu': 'combobox',
                 'options': self.themes,
                 'default': self.configFile['theme']
             },
             'language': {
-                'label': 'trad-language',
+                'label': 'language-lbl',
                 'menu': 'combobox',
                 'options': self.languages,
                 'default': self.configFile['language']
             },
             'ignore_warnings_create_nb': {
-                'label': 'trad-ignore warnings',
+                'label': 'ignore-warnings-lbl',
                 'menu': 'checkbox',
                 'default': self.configFile['ignore_warnings_create_nb']
             },
             'ignore_tooltips': {
-                'label': 'trad-ignore tooltips',
+                'label': 'ignore-tooltips-lbl',
                 'menu': 'checkbox',
                 'default': self.configFile['ignore_tooltips']
             },
             'ignore_rescaling_size': {
-                'label': 'trad-ignore rescaling',
+                'label': 'ignore-rescaling-lbl',
                 'menu': 'checkbox',
                 'default': self.configFile['ignore_rescaling_size']
             }
@@ -90,8 +119,9 @@ class configurationWindow:
         # ---CREATE OPTIONS MENU---
         for x, configOption in enumerate(self.configFile):
             option = self.config_options[configOption]
-            label = ttk.Label(self.row1, text=option['label'], width=18)
-            label.grid(row=x, column=0)
+            label = ttk.Label(self.row1, text=self._(option['label']), width=30 , wraplength=270 + len(self._(option['label'])*2),
+                              anchor='w' if len(self._(option['label'])) > 20 else 'e')
+            label.grid(row=x, column=0, pady=(7, 7), padx=5)
 
             if option['menu'] == 'combobox':
                 listOptions = self.allOptionsCombobox[configOption]
@@ -107,20 +137,22 @@ class configurationWindow:
         row2.columnconfigure(1, weight=0)
         row2.columnconfigure(2, weight=0)
         row2.columnconfigure(3, weight=1)
-        self.cancel_btn = ttk.Button(row2, text='trad-save', bootstyle='danger', command=self.closeWindow,
-                                       width=20)
-        self.cancel_btn.grid(column=0, row=0, padx=(200, 10))
-        self.save_btn = ttk.Button(row2, text='trad-crear notebook', bootstyle='success',
-                                        command= self.onSave,
-                                        width=20)
+        self.cancel_btn = ttk.Button(row2, text=self._("CANCEL-BTN"), bootstyle='danger', command=self.closeWindow,
+                                     width=20)
+        self.cancel_btn.grid(column=0, row=0, padx=(100, 10))
+        self.save_btn = ttk.Button(row2, text=self._("SAVE-BTN"), bootstyle='success',
+                                   command=self.onSave,
+                                   width=20)
         self.save_btn.grid(column=1, row=0, padx=(10, 0))
 
     def onSave(self):
         for key, value in self.params.items():
             self.configFile[key] = value
-            with open('Config/user_config.yml', "w", encoding="utf-8") as f:
+
+            with CONFIG_FILE.open("w", encoding="utf-8") as f:
                 yaml.safe_dump(self.configFile, f, allow_unicode=True, sort_keys=False)
-        Messagebox.show_info('trad-es necesario reinicar la aplicacion para aplicar los cambios','info')
+
+        Messagebox.show_info(self._("RESTART-APP-MSG"), 'info')
         self.closeWindow()
 
     def closeWindow(self):
@@ -158,7 +190,7 @@ class configurationWindow:
             onvalue=True,
             offvalue=False,
             bootstyle="square-toggle",
-            command=lambda : toggle(key, var)
+            command=lambda: toggle(key, var)
         )
         checkbutton.grid(row=row, column=1, padx=5, pady=5, sticky='ew')
 

@@ -13,7 +13,6 @@ class Knn(core_algorithm_process):
     def import_dataset(self):
         # self.name
         columns = '[' + ', '.join(f"'{x}'" for x in self.notebook.feature_columns) + ']'
-        self.cells.append(nbf.v4.new_markdown_cell('trad-'))
         self.cells.append(nbf.v4.new_code_cell("import pandas as pd\n"
                                                "from sklearn.model_selection import train_test_split\n"
                                                "from sklearn.pipeline import Pipeline\n"
