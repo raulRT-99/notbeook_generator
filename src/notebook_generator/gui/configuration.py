@@ -4,33 +4,8 @@ import yaml
 from ttkbootstrap.dialogs import Messagebox
 
 import ttkbootstrap as ttk
-
 from pathlib import Path
-import shutil
-import sys
 
-
-# Carpeta donde está el .exe o app.py
-APP_DIR = Path(sys.argv[0]).resolve().parent
-
-# Carpeta temporal/interna donde Nuitka incluyó los recursos
-BUNDLED_DIR = Path(__file__).resolve().parent
-
-# Configuración externa, junto al ejecutable
-EXTERNAL_CONFIG_DIR = APP_DIR / "Config"
-EXTERNAL_CONFIG_FILE = EXTERNAL_CONFIG_DIR / "user_config.yml"
-
-# Configuración incluida dentro del programa como plantilla inicial
-BUNDLED_CONFIG_FILE = BUNDLED_DIR / "Config" / "user_config.yml"
-
-# Crear la carpeta externa si no existe
-EXTERNAL_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-
-# Copiar la configuración inicial solo la primera vez
-if not EXTERNAL_CONFIG_FILE.exists() and BUNDLED_CONFIG_FILE.exists():
-    shutil.copy2(BUNDLED_CONFIG_FILE, EXTERNAL_CONFIG_FILE)
-
-CONFIG_FILE = EXTERNAL_CONFIG_FILE
 
 class configurationWindow:
     def __init__(self, translator, config=None):
@@ -149,7 +124,7 @@ class configurationWindow:
         for key, value in self.params.items():
             self.configFile[key] = value
 
-            with CONFIG_FILE.open("w", encoding="utf-8") as f:
+            with open('Config/user_config.yml', "w", encoding="utf-8") as f:
                 yaml.safe_dump(self.configFile, f, allow_unicode=True, sort_keys=False)
 
         Messagebox.show_info(self._("RESTART-APP-MSG"), 'info')

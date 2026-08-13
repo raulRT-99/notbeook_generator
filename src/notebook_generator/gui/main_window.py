@@ -504,7 +504,12 @@ class MainWindow:
         webbrowser.open(url)
 
     def get_local_version(self):
-        version_file = Path('./Config/VERSION')
+        version_file = (
+                Path(__file__).resolve().parent.parent
+                / "Config"
+                / "VERSION"
+        )
+
         return version_file.read_text(encoding="utf-8").strip()
 
     def get_remote_version(self):
