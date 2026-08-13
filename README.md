@@ -33,6 +33,44 @@ Además, Notebook Generator ofrece una interfaz gráfica configurable, soporte e
 - Python 3.12 o superior.
 - Dependencias incluidas en `requirements.txt`.
 
+## Instalación
+
+```bash
+git clone https://github.com/raulRT-99/notebook_generator.git
+cd notebook_generator
+python -m pip install -r requirements.txt
+```
+
+## Ejecución
+Para iniciar el proyecto es necesario arrancar desde el archivo app.py en src/notebook_generator/
+
+```bash
+python -m src.notebook_generator.app
+```
+
+## Uso
+
+Para consultar el proceso completo de configuración y generación de notebooks, visita el manual de uso:
+
+[Consultar el manual de uso en la Wiki](../../wiki)
+
+## Estructura del proyecto
+
+```text
+notebook_generator/
+├── src/
+│   └── notebook_generator/
+│       ├── Config/
+│       ├── core/
+│       ├── generators/
+│       ├── gui/
+│       ├── i18n/
+│       └── app.py
+├── tests/
+├── requirements.txt
+├── README.md
+```
+
 ## English
 
 ### Description
