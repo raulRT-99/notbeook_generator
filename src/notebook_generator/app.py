@@ -32,7 +32,7 @@ config_file = {
 def start():
     ttk.Style.instance = None
     from src.notebook_generator.gui.main_window import MainWindow
-    from i18n.manager import load_language
+    from src.notebook_generator.i18n.manager import load_language
     import yaml
 
     BASE_DIR = Path(__file__).resolve().parent
