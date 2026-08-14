@@ -242,7 +242,7 @@ msgstr ""
 "Notebook Generator allows you to create and configure notebooks easily and in a customized way.\n"
 "\n"
 "Open the repository?\n"
-"GitHub: https://github.com/raulRT-99/notbeook_generator"
+"GitHub: https://github.com/raulRT-99/notebook_generator"
 
 msgid "browse_txt"
 msgstr "Browse"

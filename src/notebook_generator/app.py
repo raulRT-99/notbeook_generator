@@ -3,20 +3,15 @@ from pathlib import Path
 
 import ttkbootstrap as ttk
 
-# Carpeta donde está el .exe o app.py
 APP_DIR = Path(sys.argv[0]).resolve().parent
 
-# Carpeta temporal/interna donde Nuitka incluyó los recursos
 BUNDLED_DIR = Path(__file__).resolve().parent
 
-# Configuración externa, junto al ejecutable
 EXTERNAL_CONFIG_DIR = APP_DIR / "Config"
 EXTERNAL_CONFIG_FILE = EXTERNAL_CONFIG_DIR / "user_config.yml"
 
-# Configuración incluida dentro del programa como plantilla inicial
 BUNDLED_CONFIG_FILE = BUNDLED_DIR / "Config" / "user_config.yml"
 
-# Crear la carpeta externa si no existe
 EXTERNAL_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
 config_file = {
