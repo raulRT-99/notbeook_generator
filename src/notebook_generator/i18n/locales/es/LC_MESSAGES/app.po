@@ -243,7 +243,7 @@ msgstr ""
 "Notebook Generator te permite crear y configurar notebooks de manera sencilla y personalizada.\n"
 "\n"
 "¿Acceder al repositorio?\n"
-"GitHub: https://github.com/raulRT-99/notbeook_generator"
+"GitHub: https://github.com/raulRT-99/notebook_generator"
 
 msgid "browse_txt"
 msgstr "Buscar"
@@ -276,3 +276,6 @@ msgstr "Actualizado!"
 
 msgid "UPDATE-VERSION-ERROR"
 msgstr "No se pudo comprobar la versión: %(error)s"
+
+msgid "exit_option"
+msgstr "Salir"

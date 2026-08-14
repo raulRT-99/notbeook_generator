@@ -484,7 +484,7 @@ class MainWindow:
                              command=lambda: configurationWindow(translator=self._, config=self.config),
                              font=('Segoe UI', self.font_size - 1))
         submenu1.add_command(label="---------------", font=('Segoe UI', self.font_size - 1), state="disabled")
-        submenu1.add_command(label="Salir", command=lambda: self.root.quit(), font=('Segoe UI', self.font_size - 1))
+        submenu1.add_command(label=self._("exit_option"), command=lambda: self.root.quit(), font=('Segoe UI', self.font_size - 1))
         menu1["menu"] = submenu1
 
         # ---MENU 2---
